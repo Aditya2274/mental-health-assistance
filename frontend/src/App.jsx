@@ -17,6 +17,7 @@ import SubmitAssessment from "@/pages/Parents/SubmitAssessment.jsx";
 import ParentAlerts from "@/pages/Parents/ParentAlerts.jsx";
 import ParentSettings from "@/pages/Parents/ParentSettings.jsx";
 import ParentReports from "@/pages/Parents/ParentReports.jsx";
+import EditChild from "@/pages/Parents/EditChild";
 
 // Teacher
 import TeacherDashboardLayout from "@/layout/teacher/TeacherDashboardLayout.jsx";
@@ -59,7 +60,8 @@ export default function App() {
           >
             <Route index element={<ParentDashboard />} />
             <Route path="children" element={<Children />} />
-            <Route path="child/:id" element={<ChildProfile />} />
+            <Route path="/parent/children/:id" element={<ChildProfile />} />
+             <Route path="/parent/children/:id/edit" element={<EditChild />} />
             <Route path="assessments" element={<SubmitAssessment />} />
             <Route path="alerts" element={<ParentAlerts />} />
             <Route path="settings" element={<ParentSettings />} />

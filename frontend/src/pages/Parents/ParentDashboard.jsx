@@ -1,23 +1,45 @@
-// src/pages/Parents/ParentDashboard.jsx
-
-import AssessmentForm from "../../components/AssessmentForm";
+import { useEffect, useState } from "react";
+import api from "../../lib/api.js";
+import AddChild from "./AddChild.jsx";
+import AssessmentForm from "../../components/AssessmentForm.jsx";
 
 export default function ParentDashboard() {
+  const [children, setChildren] = useState([]);
+
+  // Fetch children on mount
+  useEffect(() => {
+    loadChildren();
+  }, []);
+
+  const loadChildren = async () => {
+    const res = await api.get("/children/mine");
+    setChildren(res.data);
+  };
+
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">Welcome Parent 👋</h1>
+    <div className="p-6">
+      <h2 className="text-2xl font-bold">Welcome Parent 👋</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="p-6 bg-white shadow rounded-xl">
-          <h2 className="text-xl font-semibold mb-2">Submit Assessment</h2>
-          <AssessmentForm childId="12345" />
-        </div>
+      {/* Child Adding Section */}
+      <AddChild onAdded={() => loadChildren()} />
 
-        <div className="p-6 bg-white shadow rounded-xl">
-          <h2 className="text-xl font-semibold mb-2">Recent Scores</h2>
-          <p className="text-gray-600">No assessments yet...</p>
-        </div>
-      </div>
+      {/* List children */}
+      <h3 className="text-xl font-bold mt-6">Your Children</h3>
+
+      {children.length === 0 ? (
+        <p>No children yet. Add one!</p>
+      ) : (
+        children.map((child) => (
+          <div key={child._id} className="mt-4 p-4 bg-white shadow rounded">
+            <h4 className="font-bold">{child.name}</h4>
+            <p>Age: {child.age}</p>
+            <p>Grade: {child.grade}</p>
+
+            {/* Assessment Form */}
+            <AssessmentForm childId={child._id} />
+          </div>
+        ))
+      )}
     </div>
   );
 }

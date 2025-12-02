@@ -7,6 +7,8 @@ import { connectDB } from "./config/db.js";
 import { connectRedis } from "./config/redisClient.js";
 import authRoutes from "./routes/authRoutes.js";
 import auth from "./middleware/auth.js";
+import assessmentRoutes from "./routes/assessmentRoutes.js";
+import childRoutes from "./routes/childRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -24,7 +26,8 @@ async function start() {
     await connectRedis();
 
     app.use("/auth", authRoutes);
-
+    app.use("/assessment", assessmentRoutes);
+    app.use("/children", childRoutes);
     // Example protected endpoint
     app.get("/protected", auth, (req, res) => {
       if (!req.user) return res.status(401).json({ msg: "Unauthorized" });

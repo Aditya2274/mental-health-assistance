@@ -5,30 +5,47 @@ import { calculateRisk } from "../utils/scoring.js";
 
 export const submitAssessment = async (req, res) => {
   try {
+    const user = req.user;
+
+    if (!user) {
+      return res.status(401).json({ msg: "Not authenticated" });
+    }
+
     const { childId, instrument, responses, totalScore } = req.body;
 
-    const risk = calculateRisk(instrument, totalScore);
+    if (!childId || !instrument || !responses) {
+      return res.status(400).json({ msg: "Missing assessment data" });
+    }
 
+    // Calculate risk level from scoring.js
+    const riskLevel = calculateRisk(instrument, totalScore);
+
+    // Save assessment
     const assessment = await Assessment.create({
       childId,
-      raterId: req.user.id,
+      raterId: user._id,
       instrument,
       responses,
       totalScore,
-      riskLevel: risk,
+      riskLevel,
     });
 
-    // If risk is medium or high, create an alert
-    if (risk !== "low") {
+    // If medium or high, create an alert
+    if (riskLevel !== "low") {
       await Alert.create({
         childId,
         assessmentId: assessment._id,
-        severity: risk,
+        severity: riskLevel,
+        status: "pending",
       });
     }
 
-    res.json({ message: "Assessment submitted", assessment });
+    return res.status(201).json({
+      msg: "Assessment submitted successfully",
+      assessment,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Assessment submit error:", err);
+    return res.status(500).json({ msg: err.message });
   }
 };
