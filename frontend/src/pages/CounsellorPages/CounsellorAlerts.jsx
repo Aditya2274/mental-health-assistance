@@ -1,0 +1,1 @@
+export default function CounsellorAlerts(){return (<div className='p-4'>Alerts</div>);}

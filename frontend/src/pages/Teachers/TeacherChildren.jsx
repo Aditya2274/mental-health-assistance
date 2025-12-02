@@ -1,0 +1,1 @@
+export default function TeacherChildren(){return (<div className='p-4'>Teacher Children</div>);}

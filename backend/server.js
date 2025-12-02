@@ -1,29 +1,42 @@
 // backend/server.js
 import express from "express";
 import dotenv from "dotenv";
-dotenv.config();
+import cookieParser from "cookie-parser";
 import cors from "cors";
-import main from "./config/db.js";
-
+import { connectDB } from "./config/db.js";
+import { connectRedis } from "./config/redisClient.js";
 import authRoutes from "./routes/authRoutes.js";
-// other imports...
+import auth from "./middleware/auth.js";
+dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
+
 app.use(cors({
-  origin: "http://localhost:5173",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
+  origin: process.env.FRONTEND_ORIGIN || "http://localhost:5173",
+  credentials: true,
 }));
-main();
 
-// mount
-app.use("/auth", authRoutes);
+async function start() {
+  try {
+    await connectDB();
+    await connectRedis();
 
-// mount other api routes...
-// app.use("/children", childRoutes);
-// app.use("/assessment", assessmentRoutes);
+    app.use("/auth", authRoutes);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+    // Example protected endpoint
+    app.get("/protected", auth, (req, res) => {
+      if (!req.user) return res.status(401).json({ msg: "Unauthorized" });
+      res.json({ msg: "You reached a protected endpoint", user: req.user });
+    });
+
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+  } catch (err) {
+    console.error("Failed to start server:", err);
+    process.exit(1);
+  }
+}
+
+start();

@@ -1,0 +1,1 @@
+export default function TeacherAlerts(){return (<div className='p-4'>Teacher Alerts</div>);}

@@ -1,0 +1,1 @@
+export default function Children(){return (<div className='p-4'>Children Page</div>);}

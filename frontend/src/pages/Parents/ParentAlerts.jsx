@@ -1,0 +1,1 @@
+export default function ParentAlerts(){return (<div className='p-4'>Alerts</div>);}

@@ -1,0 +1,1 @@
+export default function SubmitAssessment(){return (<div className='p-4'>Submit Assessment</div>);}

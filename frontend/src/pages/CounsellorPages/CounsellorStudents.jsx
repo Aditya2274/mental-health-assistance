@@ -1,0 +1,1 @@
+export default function CounsellorStudents(){return (<div className='p-4'>All Students</div>);}

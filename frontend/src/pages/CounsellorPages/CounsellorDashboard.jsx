@@ -1,0 +1,1 @@
+export default function CounsellorDashboard(){return (<div className='p-4'>Counsellor Dashboard</div>);}

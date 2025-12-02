@@ -1,0 +1,1 @@
+export default function TeacherSettings(){return (<div className='p-4'>Teacher Settings</div>);}

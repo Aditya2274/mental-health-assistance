@@ -1,0 +1,1 @@
+export default function ChildProfile(){return (<div className='p-4'>Child Profile</div>);}

@@ -1,0 +1,1 @@
+export default function ParentSettings(){return (<div className='p-4'>Settings</div>);}

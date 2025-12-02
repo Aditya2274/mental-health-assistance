@@ -1,0 +1,1 @@
+export default function TeacherAssessments(){return (<div className='p-4'>Teacher Assessments</div>);}

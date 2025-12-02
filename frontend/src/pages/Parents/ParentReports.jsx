@@ -1,0 +1,1 @@
+export default function ParentReports(){return (<div className='p-4'>Reports</div>);}

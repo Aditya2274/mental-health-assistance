@@ -1,9 +1,10 @@
 import { useState } from "react";
-import api from "@/lib/api";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();   // <-- use AuthContext login()
 
   const [form, setForm] = useState({
     email: "",
@@ -18,18 +19,15 @@ export default function Login() {
     e.preventDefault();
 
     try {
-      const res = await api.post("/auth/login", form);
-
-      // Save token
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("role", res.data.role);
-
+      const user = await login(form.email, form.password);  
+      // user comes from backend via /auth/login
+      
       alert("Login successful!");
 
-      // Redirect based on role
-      if (res.data.role === "parent") navigate("/parent");
-      else if (res.data.role === "teacher") navigate("/teacher");
-      else if (res.data.role === "counsellor") navigate("/counsellor");
+      // Redirect automatically based on role
+      if (user.role === "parent") navigate("/parent");
+      else if (user.role === "teacher") navigate("/teacher");
+      else if (user.role === "counsellor") navigate("/counsellor");
       else navigate("/admin");
 
     } catch (err) {
@@ -63,7 +61,6 @@ export default function Login() {
           onChange={handleChange}
         />
 
-        {/* Submit */}
         <button className="btn btn-primary w-full" type="submit">
           Login
         </button>

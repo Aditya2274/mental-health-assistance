@@ -1,21 +1,43 @@
 // backend/middleware/auth.js
-import jwt from "jsonwebtoken";
+import User from "../models/User.js";
+import { redisClient } from "../config/redisClient.js";
 
-/**
- * Expects Authorization header to contain the token (just the token string)
- * Example: Authorization: eyJhbGciOi...
- */
-export default function auth(req, res, next) {
-  const token = req.header("Authorization");
+const COOKIE_NAME = process.env.COOKIE_NAME || "session_id";
 
-  if (!token) return res.status(401).json({ msg: "No token, authorization denied" });
-
+export default async function auth(req, res, next) {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    // decoded contains { id, role, iat, exp }
-    req.user = { id: decoded.id, role: decoded.role };
+    const sessionId = req.cookies?.[COOKIE_NAME];
+    if (!sessionId) {
+      req.user = null;
+      return next();
+    }
+
+    const redisKey = `sess:${sessionId}`;
+    const data = await redisClient.get(redisKey);
+    if (!data) {
+      req.user = null;
+      return next();
+    }
+
+    const parsed = JSON.parse(data);
+    const userId = parsed.userId;
+    if (!userId) {
+      req.user = null;
+      return next();
+    }
+
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+      req.user = null;
+      return next();
+    }
+
+    req.user = user;
+    req.session = { id: sessionId, ...parsed };
     next();
   } catch (err) {
-    return res.status(401).json({ msg: "Token invalid" });
+    console.error("Auth middleware error:", err);
+    req.user = null;
+    next();
   }
 }

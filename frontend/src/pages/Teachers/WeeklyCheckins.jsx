@@ -1,0 +1,1 @@
+export default function WeeklyCheckins(){return (<div className='p-4'>Weekly Checkins</div>);}

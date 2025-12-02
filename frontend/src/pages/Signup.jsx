@@ -21,8 +21,9 @@ export default function Signup() {
 
     try {
       await api.post("/auth/register", form);
+
       alert("Account created successfully!");
-      navigate("/");
+      navigate("/");  // go to login
     } catch (err) {
       alert(err.response?.data?.message || "Registration failed");
     }
@@ -38,46 +39,45 @@ export default function Signup() {
           Create Account
         </h2>
 
-        {/* Name */}
         <input
           name="name"
           type="text"
           placeholder="Full Name"
           className="input input-bordered w-full mb-3"
           onChange={handleChange}
+          required
         />
 
-        {/* Email */}
         <input
           name="email"
           type="email"
           placeholder="Email"
           className="input input-bordered w-full mb-3"
           onChange={handleChange}
+          required
         />
 
-        {/* Password */}
         <input
           name="password"
           type="password"
           placeholder="Password"
           className="input input-bordered w-full mb-3"
           onChange={handleChange}
+          required
         />
 
-        {/* Role */}
         <select
           name="role"
           className="select select-bordered w-full mb-4"
+          value={form.role}
           onChange={handleChange}
-          defaultValue="parent"
+          required
         >
           <option value="parent">Parent</option>
           <option value="teacher">Teacher</option>
           <option value="counsellor">Counsellor</option>
         </select>
 
-        {/* Submit */}
         <button type="submit" className="btn btn-primary w-full">
           Register
         </button>
