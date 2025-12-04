@@ -49,3 +49,16 @@ export const submitAssessment = async (req, res) => {
     return res.status(500).json({ msg: err.message });
   }
 };
+export const getChildAssessments = async (req, res) => {
+  try {
+    const { childId } = req.params;
+
+    const assessments = await Assessment.find({ childId })
+      .sort({ createdAt: -1 });
+
+    res.json({ assessments });
+  } catch (err) {
+    console.error("Get assessments error:", err);
+    res.status(500).json({ msg: "Failed to fetch assessments" });
+  }
+};

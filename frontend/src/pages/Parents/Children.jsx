@@ -17,7 +17,8 @@ export default function ChildrenPage() {
     setLoading(true);
     try {
       const res = await api.get("/children/mine");
-      setChildren(res.data);
+      const list = Array.isArray(res.data) ? res.data : res.data.children || [];
+      setChildren(list);
     } catch (err) {
       console.error("Load children error:", err);
       alert(err.response?.data?.msg || "Failed to load children");

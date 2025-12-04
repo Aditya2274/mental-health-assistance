@@ -1,10 +1,11 @@
 // backend/routes/assessmentRoutes.js
 import express from "express";
-import { submitAssessment } from "../controllers/assessmentController.js";
+import { getChildAssessments, submitAssessment } from "../controllers/assessmentController.js";
 import auth from "../middleware/auth.js";
 
-const router = express.Router();
+const assessmentRoutes = express.Router();
 
-router.post("/submit", auth, submitAssessment);
+assessmentRoutes.post("/submit", auth, submitAssessment);
+assessmentRoutes.get("/child/:childId", getChildAssessments);
 
-export default router;
+export default assessmentRoutes;

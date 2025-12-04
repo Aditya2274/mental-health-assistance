@@ -9,11 +9,27 @@ export default function ParentDashboard() {
   // Fetch children on mount
   useEffect(() => {
     loadChildren();
+    fetchChildren();
   }, []);
 
   const loadChildren = async () => {
     const res = await api.get("/children/mine");
-    setChildren(res.data);
+    const list = Array.isArray(res.data) ? res.data : res.data.children || [];
+    setChildren(list);  //here we are setting list because from backend is set as array
+  };
+  const fetchChildren = async () => {
+  const res = await api.get("/children/mine");
+  const list = res.data.children;
+  
+    // Fetch assessments for each child
+    const childrenWithAssessments = await Promise.all(
+      list.map(async (child) => {
+        const a = await api.get(`/assessment/child/${child._id}`);
+        return { ...child, assessments: a.data.assessments };
+      })
+    );
+  
+    setChildren(childrenWithAssessments);
   };
 
   return (
@@ -34,7 +50,22 @@ export default function ParentDashboard() {
             <h4 className="font-bold">{child.name}</h4>
             <p>Age: {child.age}</p>
             <p>Grade: {child.grade}</p>
-
+            {child.assessments && child.assessments.length > 0 ? (
+             <div className="mt-3 text-sm">
+             <  h4 className="font-semibold mb-1">Assessments:</h4>
+         
+             {child.assessments.map(a => (
+               <div key={a._id} className="border rounded p-2 mb-2 bg-gray-50">
+                 <div className="font-medium">{a.instrument}</div>
+                 <div>Score: {a.totalScore}</div>
+                 <div>Risk: {a.riskLevel}</div>
+                 <div>Date: {new Date(a.createdAt).toLocaleDateString()}</div>
+               </div>
+              ))}
+             </div>
+             ) : (
+              <p className="text-sm text-gray-500 mt-2">No assessments yet.</p>
+             )}
             {/* Assessment Form */}
             <AssessmentForm childId={child._id} />
           </div>

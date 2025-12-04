@@ -29,7 +29,7 @@ export const getMyChildren = async (req, res) => {
   try {
     if (!req.user) return res.status(401).json({ msg: "Not authenticated" });
     const children = await Child.find({ parentId: req.user._id }).sort({ name: 1 });
-    return res.json(children);
+    return res.json({children});
   } catch (err) {
     console.error("Get children error:", err);
     return res.status(500).json({ msg: err.message });
