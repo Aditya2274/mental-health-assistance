@@ -6,10 +6,16 @@ export default function AssessmentForm({ childId }) {
   const [totalScore, setTotalScore] = useState(0);
 
   const questions = [
-    { id: "q1", text: "Feels sad often" },
-    { id: "q2", text: "Has difficulty concentrating" },
-    { id: "q3", text: "Feels anxious frequently" }
-  ];
+  { id: "q1", text: "Feels sad often" },
+  { id: "q2", text: "Has difficulty concentrating" },
+  { id: "q3", text: "Feels anxious frequently" },
+  { id: "q4", text: "Feels tired or low energy" },
+  { id: "q5", text: "Poor appetite or overeating" },
+  { id: "q6", text: "Feels bad about self" },
+  { id: "q7", text: "Trouble concentrating" },
+  { id: "q8", text: "Moving or speaking slowly" },
+  { id: "q9", text: "Thoughts of self-harm" }
+];
 
   const handleChange = (id, value) => {
     const updated = { ...responses, [id]: Number(value) };

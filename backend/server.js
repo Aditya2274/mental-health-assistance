@@ -6,11 +6,14 @@ import cors from "cors";
 import { connectDB } from "./config/db.js";
 import { connectRedis } from "./config/redisClient.js";
 import authRoutes from "./routes/authRoutes.js";
-import auth from "./middleware/auth.js";
+import {auth} from "./middleware/auth.js";
 import assessmentRoutes from "./routes/assessmentRoutes.js";
+import alertRoutes from "./routes/alertRoutes.js";
 import childRoutes from "./routes/childRoutes.js";
+import { createDefaultAdmin } from "./utils/createDefaultAdmin.js";
+import adminRoutes from "./routes/adminRoutes.js";
 dotenv.config();
-
+createDefaultAdmin();
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
@@ -24,9 +27,11 @@ async function start() {
   try {
     await connectDB();
     await connectRedis();
-
+    
+    app.use("/admin", adminRoutes);
     app.use("/auth", authRoutes);
     app.use("/assessment", assessmentRoutes);
+    app.use("/alerts", alertRoutes);
     app.use("/children", childRoutes);
     // Example protected endpoint
     app.get("/protected", auth, (req, res) => {

@@ -36,6 +36,7 @@ import AssessmentReview from "@/pages/CounsellorPages/AssessmentReview.jsx";
 
 // Admin
 import AdminDashboard from "@/pages/AdminPages/AdminDashboard.jsx";
+import AdminDashboardLayout from "./layout/admin/AdminDashboardLayout.jsx";
 import UsersManagement from "@/pages/AdminPages/UsersManagement.jsx";
 import ChildrenManagement from "@/pages/AdminPages/ChildrenManagement.jsx";
 import SystemAlerts from "@/pages/AdminPages/SystemAlerts.jsx";
@@ -48,6 +49,19 @@ export default function App() {
           {/* Public */}
           <Route path="/" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          
+           {/* Admin Routes */}
+          <Route path="/admin" element={
+          <ProtectedRoute role="admin">
+             <AdminDashboardLayout />
+          </ProtectedRoute>
+           }>
+           <Route index element={<AdminDashboard />} />
+           <Route path="users" element={<UsersManagement />} />
+           <Route path="children" element={<ChildrenManagement />} />
+           <Route path="alerts" element={<SystemAlerts />} />
+           <Route path="reports" element={<Reports />} />
+           </Route>
 
           {/* Parent Routes */}
           <Route
@@ -60,8 +74,8 @@ export default function App() {
           >
             <Route index element={<ParentDashboard />} />
             <Route path="children" element={<Children />} />
-            <Route path="/parent/children/:id" element={<ChildProfile />} />
-             <Route path="/parent/children/:id/edit" element={<EditChild />} />
+            <Route path="children/:id" element={<ChildProfile />} />
+             <Route path="children/:id/edit" element={<EditChild />} />
             <Route path="assessments" element={<SubmitAssessment />} />
             <Route path="alerts" element={<ParentAlerts />} />
             <Route path="settings" element={<ParentSettings />} />

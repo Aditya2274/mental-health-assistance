@@ -24,6 +24,17 @@ export const addChild = async (req, res) => {
     return res.status(500).json({ msg: err.message });
   }
 };
+export const getChildById = async (req, res) => {
+  try {
+    const child = await Child.findById(req.params.id).lean();
+
+    if (!child) return res.status(404).json({ msg: "Child not found" });
+
+    res.json({ child });   // ← IMPORTANT FIX
+  } catch (err) {
+    res.status(500).json({ msg: "Server error", error: err.message });
+  }
+};
 
 export const getMyChildren = async (req, res) => {
   try {

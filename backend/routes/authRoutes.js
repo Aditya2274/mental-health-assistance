@@ -1,7 +1,7 @@
 // backend/routes/authRoutes.js
 import express from "express";
 import { register, login, me, logout } from "../controllers/authController.js";
-import auth from "../middleware/auth.js";
+import {auth} from "../middleware/auth.js";
 
 const router = express.Router();
 
