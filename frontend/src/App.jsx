@@ -27,8 +27,10 @@ import TeacherAssessments from "@/pages/Teachers/TeacherAssessments.jsx";
 import WeeklyCheckins from "@/pages/Teachers/WeeklyCheckins.jsx";
 import TeacherAlerts from "@/pages/Teachers/TeacherAlerts.jsx";
 import TeacherSettings from "@/pages/Teachers/TeacherSettings.jsx";
+import TaskBoard from "@/pages/Teachers/TaskBoard.jsx";
 
 // Counsellor
+import CounsellorDashboardLayout from "@/layout/counsellor/CounsellorDashboardLayout.jsx";
 import CounsellorDashboard from "@/pages/CounsellorPages/CounsellorDashboard.jsx";
 import CounsellorStudents from "@/pages/CounsellorPages/CounsellorStudents.jsx";
 import CounsellorAlerts from "@/pages/CounsellorPages/CounsellorAlerts.jsx";
@@ -97,25 +99,25 @@ export default function App() {
             <Route path="checkins" element={<WeeklyCheckins />} />
             <Route path="alerts" element={<TeacherAlerts />} />
             <Route path="settings" element={<TeacherSettings />} />
+            <Route path="taskboard" element={<TaskBoard />} />
           </Route>
 
-          {/* Counsellor */}
-          <Route
-            path="/counsellor"
-            element={<ProtectedRoute role="counsellor"><CounsellorDashboard /></ProtectedRoute>}
-          />
-          <Route
-            path="/counsellor/students"
-            element={<ProtectedRoute role="counsellor"><CounsellorStudents /></ProtectedRoute>}
-          />
-          <Route
-            path="/counsellor/alerts"
-            element={<ProtectedRoute role="counsellor"><CounsellorAlerts /></ProtectedRoute>}
-          />
-          <Route
-            path="/counsellor/review"
-            element={<ProtectedRoute role="counsellor"><AssessmentReview /></ProtectedRoute>}
-          />
+          {/* Counsellor Routes */}
+           <Route
+             path="/counsellor"
+             element={
+               <ProtectedRoute role="counsellor">
+                 <CounsellorDashboardLayout />
+               </ProtectedRoute>
+             }
+           >
+             <Route index element={<CounsellorDashboard />} />
+             <Route path="students" element={<CounsellorStudents />} />
+             <Route path="alerts" element={<CounsellorAlerts />} />
+             <Route path="review/:id" element={<AssessmentReview />} />
+             {/* <Route path="settings" element={<CounsellorSettings />} /> */}
+           </Route>
+           
 
           {/* Admin */}
           <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />

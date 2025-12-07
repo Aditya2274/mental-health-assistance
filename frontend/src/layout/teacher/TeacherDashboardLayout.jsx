@@ -16,6 +16,7 @@ export default function TeacherDashboardLayout() {
         <nav className="flex-1 px-4 py-4 space-y-1">
           <Menu to="/teacher" label="Dashboard" />
           <Menu to="/teacher/children" label="Children" />
+          <Menu to="/teacher/taskboard" label="TaskBoard" />
           <Menu to="/teacher/assessments" label="Assessments" />
           <Menu to="/teacher/checkins" label="Weekly Check-ins" />
           <Menu to="/teacher/alerts" label="Alerts" />

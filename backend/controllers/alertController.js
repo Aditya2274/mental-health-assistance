@@ -100,7 +100,27 @@ export const markAlertRead = async (req, res) => {
     return res.status(500).json({ msg: err.message });
   }
 };
+/**
+ * Counsellor: Counsellor alerts
+ * PUT /alerts/admin
+ */
+export const adminalertupdate=async(req,res)=>{
+  try{
+const { assignedTo, resolved, resolutionNotes } = req.body;
 
+  const updated = await Alert.findByIdAndUpdate(
+    req.params.id,
+    { assignedTo, resolved, resolutionNotes },
+    { new: true }
+  );
+
+  res.json({ msg: "Alert updated", alert: updated });
+  }
+  catch{
+    console.log("Admin ALert Update:",err);
+    return res.status(500).json({ msg: err.message });
+  }
+}
 /**
  * Delete alert
  * DELETE /alerts/:id

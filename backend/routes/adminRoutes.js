@@ -42,7 +42,15 @@ adminRouter.delete("/children/:id", async (req, res) => {
 
 // System alerts
 adminRouter.get("/alerts", async (req, res) => {
-  const alerts = await Alert.find().populate("childId parentId");
+  const alerts = await Alert.find()
+  .populate({
+    path: "childId",               // STEP 1: replace ObjectId with full Child
+    populate: {
+      path: "parentId",            // STEP 2: inside the Child document, populate parentId
+      select: "name email"
+    }
+  });
+
   res.json({ alerts });
 });
 

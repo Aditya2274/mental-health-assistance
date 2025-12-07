@@ -8,7 +8,9 @@ const alertSchema = new mongoose.Schema({
   severity: { type: String, enum: ["medium", "high"] },
   status: { type: String, enum: ["pending", "assigned", "resolved"], default: "pending" },
 
-  assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+  resolved: { type: Boolean, default: false },
+  resolutionNotes: { type: String, default: "" },
 });
 
 export default mongoose.model("Alert", alertSchema);

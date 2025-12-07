@@ -8,7 +8,8 @@ import {
   getAllAlerts,
   createAlert,
   markAlertRead,
-  deleteAlert
+  deleteAlert,
+  adminalertupdate
 } from "../controllers/alertController.js";
 
 const router = express.Router();
@@ -40,4 +41,6 @@ router.patch("/:id/read", markAlertRead);
 /** Delete (admin) */
 router.delete("/:id", adminOnly, deleteAlert);
 
+/** Update alert (admin / counsellor) */
+router.put("/:id", auth, adminOnly, adminalertupdate);
 export default router;
