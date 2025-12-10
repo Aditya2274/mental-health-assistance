@@ -9,7 +9,6 @@ export default function CounsellorDashboardLayout() {
     { label: "Dashboard", path: "/counsellor" },
     { label: "Students", path: "/counsellor/students" },
     { label: "Alerts", path: "/counsellor/alerts" },
-    { label: "Assessment Review", path: "/counsellor/review" },
     { label: "Settings", path: "/counsellor/settings" },
   ];
 

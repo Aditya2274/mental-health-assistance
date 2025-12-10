@@ -33,6 +33,28 @@ adminRouter.get("/children", async (req, res) => {
   const children = await Child.find().populate("parentId", "name email");
   res.json({ children });
 });
+// Assign teacher to a child
+adminRouter.put("/children/:id/assign-teacher", async (req, res) => {
+  try {
+    const { teacherId } = req.body;
+
+    if (!teacherId)
+      return res.status(400).json({ msg: "teacherId is required" });
+
+    const child = await Child.findByIdAndUpdate(
+      req.params.id,
+      { assignedTeacher: teacherId },
+      { new: true }
+    ).populate("assignedTeacher", "name email");
+
+    if (!child) return res.status(404).json({ msg: "Child not found" });
+
+    res.json({ msg: "Teacher assigned successfully", child });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Failed to assign teacher" });
+  }
+});
 
 // Delete child
 adminRouter.delete("/children/:id", async (req, res) => {

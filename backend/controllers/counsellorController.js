@@ -56,47 +56,6 @@ export const getChild = async (req, res) => {
     res.status(500).json({ msg: "Failed to load child profile" });
   }
 };
-
-/**
- * Get full assessment details (raw responses) for counsellor review
- */
-export const getAssessment = async (req, res) => {
-  try {
-    const assessment = await Assessment.findById(req.params.id)
-      .populate("childId", "name age grade parentId")
-      .populate("raterId", "name email role");
-    if (!assessment) return res.status(404).json({ msg: "Assessment not found" });
-    res.json({ assessment });
-  } catch (err) {
-    console.error("getAssessment:", err);
-    res.status(500).json({ msg: "Failed to load assessment" });
-  }
-};
-
-/**
- * Create a case note (counsellor writes notes, intervention plan)
- */
-export const createCaseNote = async (req, res) => {
-  try {
-    const { childId, assessmentId, note, actionPlan, followUpDate } = req.body;
-    if (!childId || !note) return res.status(400).json({ msg: "childId and note required" });
-
-    const cn = await CaseNote.create({
-      childId,
-      assessmentId: assessmentId || null,
-      note,
-      actionPlan: actionPlan || "",
-      followUpDate: followUpDate || null,
-      counsellorId: req.user._id
-    });
-
-    res.json({ msg: "Case note created", caseNote: cn });
-  } catch (err) {
-    console.error("createCaseNote:", err);
-    res.status(500).json({ msg: "Failed to create case note" });
-  }
-};
-
 /**
  * Assign alert to a counsellor (or to self)
  */
@@ -151,3 +110,33 @@ export const search = async (req, res) => {
     res.status(500).json({ msg: "Search failed" });
   }
 };
+export const getAllChildrenForCounsellor = async (req, res) => {
+  try {
+    // Fetch all children (you can later filter by assigned counsellor)
+    const children = await Child.find()
+      .populate("parentId", "name email")
+      .populate("assignedTeacher", "name email")
+      .lean();  // lean() returns plain JS objects → easier to attach fields
+
+    // For each child, fetch their most recent assessment
+    const enhanced = await Promise.all(
+      children.map(async (child) => {
+        const last = await Assessment.findOne({ childId: child._id })
+          .sort({ createdAt: -1 })
+          .select("_id riskLevel totalScore createdAt");
+
+        return {
+          ...child,
+          lastAssessment: last || null,
+        };
+      })
+    );
+
+    return res.json({ children: enhanced });
+
+  } catch (err) {
+    console.error("Counsellor get children error:", err);
+    res.status(500).json({ msg: "Failed to load children" });
+  }
+};
+

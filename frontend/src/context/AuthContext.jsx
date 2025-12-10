@@ -35,9 +35,10 @@ export function AuthProvider({ children }) {
       { email, password },
       { withCredentials: true }
     );
-
-    setUser(res.data.user);
-    return res.data.user;
+      const u = res.data.user;
+      const safeUser = { ...u, role: u?.role?.toLowerCase() };
+      setUser(safeUser);
+      return safeUser;
   };
 
   // ---------------------------------------------------------------------

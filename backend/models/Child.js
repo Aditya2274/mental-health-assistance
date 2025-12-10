@@ -7,11 +7,16 @@ const childSchema = new mongoose.Schema({
   grade: String,
 
   parentId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-
+  
+  assignedTeacher: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "User",
+    default: null 
+  },
   consents: {
     parentalConsent: { type: Boolean, default: false },
     consentDate: Date,
   },
-});
+},{timestamps: true});
 
 export default mongoose.model("Child", childSchema);

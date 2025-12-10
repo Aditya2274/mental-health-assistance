@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { redisClient } from "../config/redisClient.js";
 
 const COOKIE_NAME = process.env.COOKIE_NAME || "session_id";
-const COOKIE_MAX_AGE = (Number(process.env.COOKIE_MAX_AGE_DAYS) || 7) * 24 * 60 * 60 * 1000; // ms
+const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // ms
 
 export const register = async (req, res) => {
   try {
@@ -46,7 +46,7 @@ export const login = async (req, res) => {
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) return res.status(400).json({ msg: "Invalid credentials" });
 
-    const match = await bcrypt.compare(password, user.password);
+    const match = bcrypt.compare(password, user.password);
     if (!match) return res.status(400).json({ msg: "Invalid credentials" });
 
     // Create session id and store in Redis

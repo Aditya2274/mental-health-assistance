@@ -116,7 +116,7 @@ const { assignedTo, resolved, resolutionNotes } = req.body;
 
   res.json({ msg: "Alert updated", alert: updated });
   }
-  catch{
+  catch(err){
     console.log("Admin ALert Update:",err);
     return res.status(500).json({ msg: err.message });
   }

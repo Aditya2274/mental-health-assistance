@@ -1,76 +1,79 @@
-// frontend/src/pages/Counsellor/AssessmentReview.jsx
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import api from "@/lib/api";
 
 export default function AssessmentReview() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [assessment, setAssessment] = useState(null);
-  const [notes, setNotes] = useState({ note: "", actionPlan: "", followUpDate: "" });
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useEffect(() => { load(); }, [id]);
+  useEffect(() => {
+  // prevent invalid or undefined IDs
+  if (!id || id === "null" || id === "undefined") {
+    console.log("Invalid ID in URL:", id);
+    setError("Invalid assessment ID");
+    setLoading(false);
+    return;
+  }
 
-  const load = async () => {
+  console.log("Final Assessment ID:", id);
+
+  const fetchAssessment = async () => {
     try {
-      const res = await api.get(`/counsellor/assessment/${id}`);
-      setAssessment(res.data.assessment);
-    } catch (err) {
-      console.error("load assessment", err);
-      alert("Failed to load assessment");
-    }
-  };
+      const res = await api.get(`/assessment/${id}`);
 
-  const handleChange = (e) => setNotes({ ...notes, [e.target.name]: e.target.value });
+      if (!res.data || !res.data.assessment) {
+        setError("Assessment not found.");
+      } else {
+        setAssessment(res.data.assessment);
+      }
 
-  const saveNote = async (e) => {
-    e.preventDefault();
-    if (!assessment) return;
-    setSaving(true);
-    try {
-      await api.post("/counsellor/casenote", {
-        childId: assessment.childId._id,
-        assessmentId: assessment._id,
-        note: notes.note,
-        actionPlan: notes.actionPlan,
-        followUpDate: notes.followUpDate || null
-      });
-      alert("Case note saved");
-      setNotes({ note: "", actionPlan: "", followUpDate: "" });
     } catch (err) {
-      console.error(err);
-      alert("Save failed");
+      setError(err.response?.data?.msg || "Failed to load assessment");
     } finally {
-      setSaving(false);
-      load();
+      setLoading(false);
     }
   };
 
-  if (!assessment) return <p className="p-6">Loading assessment...</p>;
+  fetchAssessment();
+}, [id]);
+
+
+  if (loading) return <div>Loading assessment...</div>;
+
+  if (error)
+    return (
+      <div className="alert alert-error">
+        <p>{error}</p>
+        <button className="btn btn-sm" onClick={() => navigate("/counsellor/students")}>
+          Go back
+        </button>
+      </div>
+    );
+
+  if (!assessment) return <div>Assessment not found</div>;
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-semibold mb-4">Assessment Review</h2>
+    <div>
+      <h2 className="text-2xl font-bold mb-4">Assessment Review</h2>
+      <div className="card bg-base-100 shadow">
+        <div className="card-body">
 
-      <div className="bg-white p-4 rounded shadow mb-4">
-        <div className="font-bold">{assessment.childId?.name}</div>
-        <div className="text-sm text-gray-500">{assessment.instrument} • Score: {assessment.totalScore} • Risk: {assessment.riskLevel}</div>
+          <h3 className="font-bold text-xl">
+            {assessment.childId?.name || "Child"}
+          </h3>
 
-        <div className="mt-4">
-          <h4 className="font-medium">Responses</h4>
-          <pre className="bg-gray-100 p-3 rounded mt-2 overflow-x-auto">{JSON.stringify(assessment.responses, null, 2)}</pre>
+          <p>Instrument: {assessment.instrument}</p>
+          <p>Total Score: {assessment.totalScore}</p>
+          <p>Risk Level: {assessment.riskLevel}</p>
+
+          <h4 className="font-semibold mt-4">Responses:</h4>
+          <pre className="bg-gray-100 p-4 rounded">
+            {JSON.stringify(assessment.responses, null, 2)}
+          </pre>
         </div>
-      </div>
-
-      <div className="bg-white p-4 rounded shadow">
-        <h3 className="font-medium mb-2">Add Case Note / Action Plan</h3>
-
-        <form onSubmit={saveNote} className="space-y-3">
-          <textarea name="note" value={notes.note} onChange={handleChange} className="textarea textarea-bordered w-full" placeholder="Clinical note / observations" required />
-          <textarea name="actionPlan" value={notes.actionPlan} onChange={handleChange} className="textarea textarea-bordered w-full" placeholder="Action plan / recommendations" />
-          <input type="date" name="followUpDate" value={notes.followUpDate} onChange={handleChange} className="input input-bordered w-full" />
-          <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? "Saving..." : "Save Case Note"}</button>
-        </form>
       </div>
     </div>
   );

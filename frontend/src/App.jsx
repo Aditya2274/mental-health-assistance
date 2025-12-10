@@ -32,9 +32,11 @@ import TaskBoard from "@/pages/Teachers/TaskBoard.jsx";
 // Counsellor
 import CounsellorDashboardLayout from "@/layout/counsellor/CounsellorDashboardLayout.jsx";
 import CounsellorDashboard from "@/pages/CounsellorPages/CounsellorDashboard.jsx";
+import CounsellorChildProfile from "./pages/CounsellorPages/CounsellorChildProfile.jsx";
 import CounsellorStudents from "@/pages/CounsellorPages/CounsellorStudents.jsx";
 import CounsellorAlerts from "@/pages/CounsellorPages/CounsellorAlerts.jsx";
 import AssessmentReview from "@/pages/CounsellorPages/AssessmentReview.jsx";
+import CounsellorSettings from "@/pages/CounsellorPages/CounsellorSettings.jsx";
 
 // Admin
 import AdminDashboard from "@/pages/AdminPages/AdminDashboard.jsx";
@@ -115,16 +117,9 @@ export default function App() {
              <Route path="students" element={<CounsellorStudents />} />
              <Route path="alerts" element={<CounsellorAlerts />} />
              <Route path="review/:id" element={<AssessmentReview />} />
-             {/* <Route path="settings" element={<CounsellorSettings />} /> */}
+             <Route path="child/:id" element={<CounsellorChildProfile />} />
+             <Route path="settings" element={<CounsellorSettings />} />
            </Route>
-           
-
-          {/* Admin */}
-          <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
-          <Route path="/admin/users" element={<ProtectedRoute role="admin"><UsersManagement /></ProtectedRoute>} />
-          <Route path="/admin/children" element={<ProtectedRoute role="admin"><ChildrenManagement /></ProtectedRoute>} />
-          <Route path="/admin/alerts" element={<ProtectedRoute role="admin"><SystemAlerts /></ProtectedRoute>} />
-          <Route path="/admin/reports" element={<ProtectedRoute role="admin"><Reports /></ProtectedRoute>} />
 
           {/* Errors */}
           <Route path="/403" element={<Forbidden403 />} />

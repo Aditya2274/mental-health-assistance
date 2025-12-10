@@ -42,5 +42,5 @@ router.patch("/:id/read", markAlertRead);
 router.delete("/:id", adminOnly, deleteAlert);
 
 /** Update alert (admin / counsellor) */
-router.put("/:id", auth, adminOnly, adminalertupdate);
+router.put("/:id", adminOnly, adminalertupdate);
 export default router;
