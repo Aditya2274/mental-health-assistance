@@ -57,23 +57,102 @@ adminRouter.put("/children/:id/assign-teacher", async (req, res) => {
 });
 
 // Delete child
+// adminRoutes.js
 adminRouter.delete("/children/:id", async (req, res) => {
-  await Child.findByIdAndDelete(req.params.id);
-  res.json({ msg: "Child deleted" });
+  try {
+    const childId = req.params.id;
+
+    // 1. Verify child exists
+    const child = await Child.findById(childId);
+    if (!child) {
+      return res.status(404).json({ msg: "Child not found" });
+    }
+
+    // 2. Cascade delete
+    await Promise.all([
+      Assessment.deleteMany({ childId }),
+      Alert.deleteMany({ childId }),
+      CaseNote.deleteMany({ childId }),
+      Task.deleteMany({ childId }),
+      Checkin.deleteMany({ childId })
+    ]);
+
+    // 3. Delete child
+    await Child.findByIdAndDelete(childId);
+
+    res.json({ msg: "Child and all related data deleted" });
+  } catch (err) {
+    console.error("Admin delete child:", err);
+    res.status(500).json({ msg: "Failed to delete child" });
+  }
 });
+
 
 // System alerts
 adminRouter.get("/alerts", async (req, res) => {
-  const alerts = await Alert.find()
-  .populate({
-    path: "childId",               // STEP 1: replace ObjectId with full Child
-    populate: {
-      path: "parentId",            // STEP 2: inside the Child document, populate parentId
-      select: "name email"
-    }
-  });
+  try {
+    const alerts = await Alert.find()
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "childId",
+        populate: { path: "parentId", select: "name email" }
+      })
+      .populate("assessmentId")
+      .populate("assignedTo", "name email role");
 
-  res.json({ alerts });
+    res.json({ alerts });
+  } catch (err) {
+    console.error("Admin Alerts Error:", err);
+    res.status(500).json({ msg: "Failed to load alerts" });
+  }
+});
+//Edit Alerts
+adminRouter.put("/alerts/:id", async (req, res) => {
+  try {
+    const { assignedTo, status, resolutionNotes } = req.body;
+
+    const updated = await Alert.findByIdAndUpdate(
+      req.params.id,
+      { assignedTo, status, resolutionNotes },
+      { new: true }
+    )
+      .populate("childId")
+      .populate("assignedTo", "name email")
+      .populate("assessmentId");
+
+    res.json({ msg: "Alert updated", alert: updated });
+  } catch (err) {
+    console.error("Admin Update Alert:", err);
+    res.status(500).json({ msg: "Failed to update alert" });
+  }
 });
 
+adminRouter.get("/children/:id/profile",async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id))
+      return res.status(400).json({ msg: "Invalid child ID" });
+
+    const child = await Child.findById(id)
+      .populate("parentId", "name email")
+      .populate("assignedTeacher", "name email");
+
+    if (!child) return res.status(404).json({ msg: "Child not found" });
+
+    const assessments = await Assessment.find({ childId: id })
+      .sort({ createdAt: -1 })
+      .select("instrument totalScore riskLevel createdAt");
+
+    const alerts = await Alert.find({ childId: id })
+      .sort({ createdAt: -1 })
+      .select("severity status createdAt");
+
+    res.json({ child, assessments, alerts });
+
+  } catch (err) {
+    console.error("Admin child profile:", err);
+    res.status(500).json({ msg: "Failed to load child profile" });
+  }
+});
 export default adminRouter;

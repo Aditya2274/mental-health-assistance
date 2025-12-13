@@ -8,7 +8,7 @@ import {
   getChildById,
   deleteChild
 } from "../controllers/childController.js";
-import {auth} from "../middleware/auth.js";
+import {auth, requireAuth, counsellorOnly} from "../middleware/auth.js";
 
 const childRoutes = express.Router();
 
@@ -18,5 +18,4 @@ childRoutes.get("/:id/details", auth, getChildDetails);
 childRoutes.get("/:id",auth,getChildById);
 childRoutes.put("/:id", auth, updateChild);
 childRoutes.delete("/:id", auth, deleteChild);
-
 export default childRoutes;

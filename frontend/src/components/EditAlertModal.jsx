@@ -1,81 +1,100 @@
-import { useState, useEffect } from "react";
-import Modal from "./ui/Modal";
+import { useEffect, useState } from "react";
 import api from "@/lib/api";
+import Modal from "./ui/Modal";
 
-export default function EditAlertModal({ open, onClose, alert, onUpdated }) {
+export default function EditAlertModal({ open, onClose, alertData, onUpdated }) {
+  const [counsellors, setCounsellors] = useState([]);
   const [form, setForm] = useState({
     assignedTo: "",
-    resolved: false,
-    resolutionNotes: "",
+    status: "",
+    resolutionNotes: ""
   });
 
-  const [counsellors, setCounsellors] = useState([]);
-
   useEffect(() => {
-    if (alert) {
+    if (alertData) {
       setForm({
-        assignedTo: alert.assignedTo?._id || "",
-        resolved: alert.resolved || false,
-        resolutionNotes: alert.resolutionNotes || "",
+        assignedTo: alertData.assignedTo?._id || "",
+        status: alertData.status,
+        resolutionNotes: alertData.resolutionNotes || ""
       });
     }
     loadCounsellors();
-  }, [alert]);
+  }, [alertData]);
 
   const loadCounsellors = async () => {
     const res = await api.get("/admin/users");
     setCounsellors(res.data.users.filter((u) => u.role === "counsellor"));
   };
 
-  const handleSubmit = async (e) => {
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
+
+  const saveChanges = async (e) => {
     e.preventDefault();
-    await api.put(`/alerts/${alert._id}`, form);
+    await api.put(`/admin/alerts/${alertData._id}`, form);
     onUpdated();
     onClose();
   };
+
+  if (!alertData) return null;
 
   return (
     <Modal open={open} onClose={onClose}>
       <h2 className="text-xl font-bold mb-4">Edit Alert</h2>
 
-      <form className="space-y-4" onSubmit={handleSubmit}>
-        <select
-          name="assignedTo"
-          className="select select-bordered w-full"
-          value={form.assignedTo}
-          onChange={(e) =>
-            setForm({ ...form, assignedTo: e.target.value })
-          }
-        >
-          <option value="">Unassigned</option>
-          {counsellors.map((c) => (
-            <option value={c._id} key={c._id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+      <div className="text-sm mb-3">
+        <p><strong>Child:</strong> {alertData.childId?.name}</p>
+        <p><strong>Parent:</strong> {alertData.childId?.parentId?.name} ({alertData.childId?.parentId?.email})</p>
+        <p><strong>Severity:</strong> {alertData.severity}</p>
+        <p><strong>Assessment Score:</strong> {alertData.assessmentId?.totalScore}</p>
+      </div>
 
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={form.resolved}
-            onChange={(e) =>
-              setForm({ ...form, resolved: e.target.checked })
-            }
-          />
-          Mark as resolved
-        </label>
+      <form className="space-y-4" onSubmit={saveChanges}>
+        {/* Assign Counsellor */}
+        <div>
+          <label className="font-medium">Assign Counsellor</label>
+          <select
+            name="assignedTo"
+            value={form.assignedTo}
+            onChange={handleChange}
+            className="w-full border rounded px-3 py-2"
+          >
+            <option value="">None</option>
+            {counsellors.map((c) => (
+              <option key={c._id} value={c._id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
+        {/* Status */}
+        <div>
+          <label className="font-medium">Status</label>
+          <select
+            name="status"
+            value={form.status}
+            onChange={handleChange}
+            className="w-full border rounded px-3 py-2"
+          >
+            <option value="pending">Pending</option>
+            <option value="assigned">Assigned</option>
+            <option value="resolved">Resolved</option>
+          </select>
+        </div>
+
+        {/* Resolution Notes */}
         <textarea
-          className="textarea textarea-bordered w-full"
-          placeholder="Resolution notes..."
+          name="resolutionNotes"
           value={form.resolutionNotes}
-          onChange={(e) =>
-            setForm({ ...form, resolutionNotes: e.target.value })
-          }
+          onChange={handleChange}
+          placeholder="Add resolution notes..."
+          className="w-full border rounded px-3 py-2"
         />
 
-        <button className="btn btn-primary w-full">Save</button>
+        <button className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+          Save Changes
+        </button>
       </form>
     </Modal>
   );

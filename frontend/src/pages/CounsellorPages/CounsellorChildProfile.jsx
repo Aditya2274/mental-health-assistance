@@ -8,28 +8,37 @@ export default function CounsellorChildProfile() {
   const navigate = useNavigate();
   const [data, setData] = useState({ child: null, assessments: [], notes: [], alerts: [] });
   const [loading, setLoading] = useState(true);
+  const [checkins, setCheckins] = useState([]);
 
   useEffect(() => { if (id) load(); }, [id]);
 
   const load = async () => {
-    try {
-      setLoading(true);
-      const res = await api.get(`/counsellor/child/${id}`);
-      // res.data: { child, assessments, notes, alerts }
-      setData({
-        child: res.data.child,
-        assessments: res.data.assessments || [],
-        notes: res.data.notes || [],
-        alerts: res.data.alerts || [],
-      });
-    } catch (err) {
-      console.error("Failed to load child:", err);
-      alert(err.response?.data?.msg || "Failed to load child");
-      navigate("/counsellor/students");
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+
+    const [childRes, checkinRes] = await Promise.all([
+      api.get(`/counsellor/child/${id}`),
+      api.get(`/counsellor/checkins?childId=${id}`)
+    ]);
+
+    setData({
+      child: childRes.data.child,
+      assessments: childRes.data.assessments || [],
+      notes: childRes.data.notes || [],
+      alerts: childRes.data.alerts || [],
+    });
+
+    setCheckins(checkinRes.data.checkins || []);
+
+  } catch (err) {
+    console.error("Failed to load child:", err);
+    alert(err.response?.data?.msg || "Failed to load child");
+    navigate("/counsellor/students");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const assignToMe = async (alertId) => {
     try {
@@ -66,6 +75,27 @@ export default function CounsellorChildProfile() {
         <div className="text-sm text-gray-600">Age: {data.child.age} • Grade: {data.child.grade}</div>
         <div className="text-sm text-gray-500">Parent: {data.child.parentId?.name} ({data.child.parentId?.email})</div>
       </div>
+       <h3 className="font-semibold mt-4">Teacher Weekly Check-ins</h3>
+      
+       {checkins.length === 0 ? (
+        <p className="text-sm text-gray-500">No check-ins recorded</p>
+       ) : (
+        checkins.map(ci => (
+          <div key={ci._id} className="bg-white p-3 rounded shadow mb-2">
+            <div className="flex justify-between">
+              <div>
+                <div className="font-medium">{ci.teacherId?.name}</div>
+                <div className="text-sm text-gray-500">
+                  {new Date(ci.date).toLocaleDateString()}
+                </div>
+              </div>
+              <div className="font-bold">{ci.rating}/10</div>
+            </div>
+            <div className="text-sm mt-2"><b>Notes:</b> {ci.notes}</div>
+            <div className="text-sm"><b>Actions:</b> {ci.actions}</div>
+          </div>
+        ))
+        )}
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
@@ -95,7 +125,7 @@ export default function CounsellorChildProfile() {
           ))}
         </div>
       </div>
-
+       
       <div className="mt-6">
         <h3 className="font-semibold mb-2">Case Notes</h3>
         {data.notes.length === 0 ? <p>No case notes</p> : data.notes.map(n => (

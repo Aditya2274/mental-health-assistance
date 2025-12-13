@@ -63,6 +63,7 @@ export default function App() {
            <Route index element={<AdminDashboard />} />
            <Route path="users" element={<UsersManagement />} />
            <Route path="children" element={<ChildrenManagement />} />
+           <Route   path="/admin/children/:id/profile" element={<ChildProfile/>}/>
            <Route path="alerts" element={<SystemAlerts />} />
            <Route path="reports" element={<Reports />} />
            </Route>

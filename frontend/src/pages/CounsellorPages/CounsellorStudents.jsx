@@ -12,11 +12,12 @@ export default function CounsellorStudents() {
   const load = async () => {
     try {
       const res = await api.get("/counsellor/children");
-      const list = res.data?.children || [];
+      const list = res.data?.children || res.data || [];
+       console.log("Children list:", list);
       setChildren(list);
     } catch (err) {
       console.error("load counsellor children:", err);
-      alert("Failed to load students");
+      alert("Failed to load students"+ (err.response?.data?.msg || err.message));
     } finally {
       setLoading(false);
     }
@@ -31,10 +32,9 @@ export default function CounsellorStudents() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {children.map((c) => (
           <div key={c._id} className="card bg-white p-4 shadow">
-            <div className="font-semibold text-lg">{c.name}</div>
-            <div className="text-sm text-gray-500">
-              Age {c.age} • Grade {c.grade}
-            </div>
+             <div className="font-semibold text-lg">{c.name}</div>
+              <div className="text-sm text-gray-500">Age {c.age} • Grade {c.grade}</div>
+              <div className="text-sm text-slate-400 mt-2">Parent: {c.parentId?.name} ({c.parentId?.email})</div>
 
             <div className="mt-3 flex gap-2">
               <Link

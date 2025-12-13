@@ -60,7 +60,17 @@ export const getRecentTeacherAssessments = async (req, res) => {
     res.status(500).json({ msg: "Failed to load assessments" });
   }
 };
+export const assessment=async (req, res) => {
+  try {
+    const assessments = await Assessment.find({ raterId: req.user._id })
+      .populate("childId", "name age grade");
 
+    res.json({ assessments });
+  } catch (err) {
+    console.error("Teacher assessments:", err);
+    res.status(500).json({ msg: "Failed to load assessments" });
+  }
+}
 /**
  * Create a weekly check-in
  * POST /teacher/checkin
@@ -99,9 +109,12 @@ export const listCheckins = async (req, res) => {
   try {
     const { childId } = req.query;
     const filter = {};
+    // By default teachers should see their own checkins
+    if (req.user && req.user.role === "teacher") {
+      filter.teacherId = req.user._id;
+    }
     if (childId && mongoose.Types.ObjectId.isValid(childId)) filter.childId = childId;
 
-    // if teacher role, show only their checkins unless childId specified — keep simple: teachers see all for now
     const checkins = await Checkin.find(filter)
       .populate("childId", "name age grade")
       .populate("teacherId", "name email")
@@ -113,6 +126,7 @@ export const listCheckins = async (req, res) => {
     res.status(500).json({ msg: "Failed to load checkins" });
   }
 };
+
 
 export const updateCheckin = async (req, res) => {
   try {
@@ -140,5 +154,16 @@ export const deleteCheckin = async (req, res) => {
   } catch (err) {
     console.error("deleteCheckin:", err);
     res.status(500).json({ msg: "Failed to delete checkin" });
+  }
+};
+export const childrenassessment=async (req, res) => {
+  try {
+    const children = await Child.find({ assignedTeacher: req.user._id })
+      .populate("parentId", "name email");
+
+    res.json({ children });
+  } catch (err) {
+    console.error("Teacher get children:", err);
+    res.status(500).json({ msg: "Failed to load children" });
   }
 };
