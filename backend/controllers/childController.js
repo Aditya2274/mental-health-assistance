@@ -39,7 +39,7 @@ export const getChildById = async (req, res) => {
 export const getMyChildren = async (req, res) => {
   try {
     if (!req.user) return res.status(401).json({ msg: "Not authenticated" });
-    const children = await Child.find({ parentId: req.user._id }).sort({ name: 1 });
+    const children = await Child.find({parentId: req.user._id }).sort({ name: 1 });
     return res.json({children});
   } catch (err) {
     console.error("Get children error:", err);
@@ -58,8 +58,8 @@ export const getChildDetails = async (req, res) => {
     if (String(child.parentId) !== String(req.user._id)) return res.status(403).json({ msg: "Forbidden" });
 
     // fetch assessments and alerts for this child
-    const assessments = await Assessment.find({ childId: id }).sort({ createdAt: -1 });
-    const alerts = await Alert.find({ childId: id }).sort({ createdAt: -1 });
+    const assessments = await Assessment.find({ orphaned: { $ne: true } },{ childId: id }).sort({ createdAt: -1 });
+    const alerts = await Alert.find({ orphaned: { $ne: true } },{ childId: id }).sort({ createdAt: -1 });
 
     return res.json({ child, assessments, alerts });
   } catch (err) {

@@ -32,12 +32,14 @@ export default function CounsellorAlerts() {
             </div>
 
             <div className="flex gap-3 mt-3">
-              <Link
-                to={`/counsellor/review/${a.lastAssessment._id} `}
-                className="btn btn-sm btn-primary"
-              >
-                Review Assessment
-              </Link>
+              {a.assessmentId?._id ? (
+                <Link
+                  to={`/counsellor/review/${a.assessmentId._id}`}
+                  className="btn btn-sm btn-primary"
+                >
+                  Review Assessment
+                </Link>
+              ) : null}
               <Link
                 to={`/counsellor/child/${a.childId?._id}`}
                 className="btn btn-sm btn-ghost"

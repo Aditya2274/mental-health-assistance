@@ -16,13 +16,18 @@ const findAlertsForChildren = async (childIds = []) => {
  */
 export const getAlertsForParent = async (req, res) => {
   try {
-    const children = await Child.find({ parentId: req.user._id }).select("_id").lean();
-    const childIds = children.map((c) => c._id);
-    const alerts = await findAlertsForChildren(childIds);
-    return res.json({ alerts });
+    const children = await Child.find({ parentId: req.user._id })
+      .select("_id")
+      .lean();
+
+    const childIds = children.map(c => c._id);
+    const alerts = await Alert.find({ childId: { $in: childIds } })
+      .populate("childId", "name")
+      .sort({ createdAt: -1 });
+
+    res.json({ alerts });
   } catch (err) {
-    console.error("getAlertsForParent:", err);
-    return res.status(500).json({ msg: err.message });
+    res.status(500).json({ msg: "Failed to load alerts" });
   }
 };
 
@@ -33,8 +38,15 @@ export const getAlertsForParent = async (req, res) => {
  */
 export const getAlertsForTeacher = async (req, res) => {
   try {
-    // TODO: implement teacher->students mapping
-    const alerts = await Alert.find({}).sort({ createdAt: -1 }).lean();
+    // Get children assigned to this teacher
+    const children = await Child.find({ assignedTeacher: req.user._id }).select("_id").lean();
+    const childIds = children.map((c) => c._id);
+    
+    // Get alerts for assigned children and populate childId
+    const alerts = await Alert.find({ childId: { $in: childIds } })
+      .populate("childId", "name age grade")
+      .sort({ createdAt: -1 })
+      .lean();
     return res.json({ alerts });
   } catch (err) {
     console.error("getAlertsForTeacher:", err);

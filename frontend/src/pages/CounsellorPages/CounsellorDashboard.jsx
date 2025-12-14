@@ -2,8 +2,9 @@
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
 import { Link } from "react-router-dom";
+import AssignTeacherModal from "@/components/AssignTeacherModal.jsx";
 
-function AlertCard({ a, onAssign, onResolve }) {
+function AlertCard({ a, onAssignTeacher, onResolve }) {
   return (
     <div className="bg-white p-4 rounded shadow">
       <div className="flex justify-between">
@@ -13,9 +14,11 @@ function AlertCard({ a, onAssign, onResolve }) {
           <div className="text-sm mt-2">{a.assessmentId?.instrument ?? "Assessment"}</div>
         </div>
         <div className="flex flex-col gap-2">
-          <button className="btn btn-sm" onClick={() => onAssign(a)}>Assign</button>
+          <button className="btn btn-sm" onClick={() => onAssignTeacher(a)}>Assign</button>
           <button className="btn btn-sm btn-ghost" onClick={() => onResolve(a)}>Resolve</button>
-          <Link to={`/counsellor/assessment/${a.assessmentId?._id || ""}`} className="text-xs text-blue-600">Review</Link>
+          {a.assessmentId?._id ? (
+            <Link to={`/counsellor/review/${a.assessmentId._id}`} className="text-xs text-blue-600">Review</Link>
+          ) : null}
         </div>
       </div>
     </div>
@@ -26,6 +29,8 @@ export default function CounsellorDashboard() {
   const [alerts, setAlerts] = useState([]);
   const [recent, setRecent] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [childTarget, setChildTarget] = useState(null);
 
   useEffect(() => { load(); }, []);
 
@@ -44,11 +49,16 @@ export default function CounsellorDashboard() {
     } finally { setLoading(false); }
   };
 
-  const handleAssign = async (a) => {
+  const handleAssignTeacher = async (a) => {
+    // Get child data for the modal
     try {
-      await api.put(`/counsellor/alerts/${a._id}/assign`, { assignedTo: null }); // assign to self
-      load();
-    } catch (err) { console.error(err); alert("Assign failed"); }
+      const childRes = await api.get(`/counsellor/child/${a.childId._id}`);
+      setChildTarget(childRes.data.child);
+      setAssignOpen(true);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to load child data");
+    }
   };
 
   const handleResolve = async (a) => {
@@ -70,7 +80,7 @@ export default function CounsellorDashboard() {
           <h3 className="text-lg font-semibold mb-2">Alerts (High / Unassigned)</h3>
           <div className="space-y-3">
             {alerts.length === 0 ? <p>No alerts.</p> :
-              alerts.map(a => <AlertCard key={a._id} a={a} onAssign={handleAssign} onResolve={handleResolve} />)
+              alerts.map(a => <AlertCard key={a._id} a={a} onAssignTeacher={handleAssignTeacher} onResolve={handleResolve} />)
             }
           </div>
         </div>
@@ -86,7 +96,7 @@ export default function CounsellorDashboard() {
                     <div className="text-xs text-gray-500">{r.instrument} • Score: {r.totalScore}</div>
                   </div>
                   <div className="flex gap-2">
-                    <Link to={`/counsellor/assessment/${r._id}`} className="btn btn-sm">Review</Link>
+                    <Link to={`/counsellor/review/${r._id}`} className="btn btn-sm">Review</Link>
                     <Link to={`/counsellor/child/${r.childId?._id}`} className="btn btn-sm btn-ghost">Profile</Link>
                   </div>
                 </div>
@@ -95,6 +105,17 @@ export default function CounsellorDashboard() {
           </div>
         </div>
       </div>
+
+      <AssignTeacherModal
+        open={assignOpen}
+        onClose={() => {
+          setAssignOpen(false);
+          setChildTarget(null);
+        }}
+        child={childTarget}
+        onUpdated={load}
+        userRole="counsellor"
+      />
     </div>
   );
 }

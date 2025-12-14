@@ -15,6 +15,8 @@ import adminRoutes from "./routes/adminRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import teacherRouter from "./routes/teacherRoutes.js";
 import counsellorRoutes from "./routes/counsellorRoutes.js";
+import parentRoutes from "./routes/parentRoutes.js"
+import chatRoutes from "./routes/ChatRoutes.js";
 console.log(1);
 dotenv.config();
 createDefaultAdmin();
@@ -46,10 +48,12 @@ async function start() {
     app.use("/assessment", assessmentRoutes);
     console.log(10);
     app.use("/alerts", alertRoutes);
+    app.use("/parent", parentRoutes);
     app.use("/children", childRoutes);
     app.use("/tasks", taskRoutes);
     app.use("/teacher",teacherRouter);
     app.use("/counsellor", counsellorRoutes);
+    app.use("/chat", chatRoutes);
     // Example protected endpoint
     app.get("/protected", auth, (req, res) => {
       if (!req.user) return res.status(401).json({ msg: "Unauthorized" });
