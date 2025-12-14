@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import AssignTeacherModal from "@/components/AssignTeacherModal.jsx";
 import api from "@/lib/api";
 
@@ -39,12 +38,10 @@ export default function ChildrenManagement() {
                 <div>
                   <div className="font-semibold">{c.name}</div>
                   <div className="text-sm text-slate-500">Grade: {c.grade} · Age: {c.age}</div>
-                  <div className="text-sm text-slate-400 mt-2">Parent: {c.parentId?.name ?? "No Parent"} ({c.parentId?.email ?? "N/A"})</div>
+                  <div className="text-sm text-slate-400 mt-2">Parent: {c.parentId?.name} ({c.parentId?.email})</div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Link to={`/admin/children/${c._id}/profile`} className="btn btn-sm">
-                    View
-                  </Link>
+                  <button className="btn btn-sm" onClick={() => alert("Open child profile")}>View</button>
                   <button className="btn btn-sm btn-error" onClick={() => handleDelete(c._id)}>Delete</button>
                   <button className="px-3 py-1 bg-indigo-500 text-white rounded"
                     onClick={() => {
@@ -63,7 +60,7 @@ export default function ChildrenManagement() {
       <AssignTeacherModal
         open={assignOpen}
         onClose={() => setAssignOpen(false)}
-        child={childTarget?? null}
+        child={childTarget}
         onUpdated={load}
       />
     </div>

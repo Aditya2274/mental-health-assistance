@@ -4,7 +4,7 @@ import Assessment from "../models/Assessment.js";
 import Child from "../models/Child.js";
 import CaseNote from "../models/CaseNote.js";
 import User from "../models/User.js";
-import Checkin from "../models/Checkin.js"
+
 /**
  * Get alerts relevant for counsellor:
  * - by default counsellor sees high severity alerts and unassigned alerts
@@ -18,27 +18,11 @@ export const getCounsellorAlerts = async (req, res) => {
         { assignedTo: null }
       ]
     })
-      .populate({
-        path: "childId",
-        select: "name age grade parentId"
-      })
-      .populate({
-        path: "assessmentId",
-        select: "instrument totalScore riskLevel createdAt"
-      })
-      .sort({ createdAt: -1 })
-      .lean();
+      .populate("childId", "name age grade parentId")
+      .populate("assessmentId")
+      .sort({ createdAt: -1 });
 
-    // Attach lastAssessment safe fallback
-    const alertsWithLast = alerts.map(a => {
-      return {
-        ...a,
-        lastAssessment: a.assessmentId || null
-      };
-    });
-    const cleanAlerts = alertsWithLast.filter(a => a.childId);
-    res.json({ alerts: cleanAlerts });
-
+    res.json({ alerts });
   } catch (err) {
     console.error("getCounsellorAlerts:", err);
     res.status(500).json({ msg: "Failed to load alerts" });
@@ -52,9 +36,8 @@ export const getRecentAssessments = async (req, res) => {
       .populate("raterId", "name role email")
       .sort({ createdAt: -1 })
       .limit(50);
-      // Filter out orphan assessments
-      const validAssessments = assessments.filter(a => a.childId);
-      res.json({ assessments: validAssessments });
+
+    res.json({ assessments });
   } catch (err) {
     console.error("getRecentAssessments:", err);
     res.status(500).json({ msg: "Failed to load assessments" });
@@ -127,25 +110,6 @@ export const search = async (req, res) => {
     res.status(500).json({ msg: "Search failed" });
   }
 };
-export const getCheckinsForCounsellor = async (req, res) => {
-  try {
-    const { childId } = req.query;
-
-    const filter = {};
-    if (childId) filter.childId = childId;
-
-    const checkins = await Checkin.find(filter)
-      .populate("childId", "name age grade")
-      .populate("teacherId", "name email")
-      .sort({ date: -1 });
-
-    res.json({ checkins });
-  } catch (err) {
-    console.error("Counsellor get checkins:", err);
-    res.status(500).json({ msg: "Failed to load check-ins" });
-  }
-};
-
 export const getAllChildrenForCounsellor = async (req, res) => {
   try {
     // Fetch all children (you can later filter by assigned counsellor)
@@ -175,3 +139,4 @@ export const getAllChildrenForCounsellor = async (req, res) => {
     res.status(500).json({ msg: "Failed to load children" });
   }
 };
+

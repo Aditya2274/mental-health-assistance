@@ -9,26 +9,18 @@ export default function WeeklyCheckins() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-  const loadAll = async () => {
-    setLoading(true);
-    await Promise.all([loadChildren(), loadCheckins()]);
-    setLoading(false);
-  };
-  loadAll();
-  }, []);
+  useEffect(() => { loadChildren(); loadCheckins(); }, []);
 
   const loadChildren = async () => {
-  try {
-    const res = await api.get("/teacher/children"); // correct teacher endpoint
-    const list = res.data?.children || res.data || [];
-    setChildren(list);
-  } catch (err) {
-    console.error("loadChildren:", err);
-    alert("Failed to load children");
-  }
-};
-
+    try {
+      const res = await api.get("/children/mine"); // or /teacher/children
+      const list = res.data?.children || res.data || [];
+      setChildren(list);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to load children");
+    }
+  };
 
   const loadCheckins = async () => {
     try {
@@ -42,11 +34,7 @@ export default function WeeklyCheckins() {
     }
   };
 
-  const handleChange = (e) => {
-  const { name, value } = e.target;
-  setForm(prev => ({ ...prev, [name]: name === "rating" ? Number(value) : value }));
-  };
-
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const submit = async (e) => {
     e.preventDefault();

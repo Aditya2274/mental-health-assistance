@@ -1,87 +1,61 @@
 import { useEffect, useState } from "react";
-import api from "@/lib/api";
 import EditAlertModal from "@/components/EditAlertModal.jsx";
+import api from "@/lib/api";
 
 export default function SystemAlerts() {
   const [alerts, setAlerts] = useState([]);
-  const [selectedAlert, setSelectedAlert] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
-
-  useEffect(() => {
-    load();
-  }, []);
-
+  const [selectedAlert, setSelectedAlert] = useState(null);
   const load = async () => {
     try {
       const res = await api.get("/admin/alerts");
       setAlerts(res.data.alerts || []);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to load alerts");
-    }
+    } catch (err) { console.error(err); alert("Failed to load alerts"); }
   };
 
-  const markResolved = async (a) => {
-    const notes = prompt("Resolution notes? (optional)") || "";
-    await api.put(`/admin/alerts/${a._id}`, {
-      status: "resolved",
-      resolutionNotes: notes
-    });
-    load();
-  };
+  useEffect(() => { load(); }, []);
 
+  const handleDelete = async (id) => {
+    if (!confirm("Delete alert?")) return;
+    try {
+      await api.delete(`/alerts/${id}`); // admin route allowed to delete alerts
+      setAlerts(prev => prev.filter(a => a._id !== id));
+    } catch (err) { console.error(err); alert("Delete failed"); }
+  };
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">System Alerts</h2>
+    <div>
+      <h2 className="text-2xl font-semibold mb-4">System Alerts</h2>
 
-      <div className="space-y-4">
-        {alerts.map((a) => (
-          <div key={a._id} className="bg-white p-4 rounded shadow">
-            {/* Alert Basic Info */}
-            <div className="font-semibold">{a.childId?.name}</div>
-
-            <div className="text-sm text-gray-500">
-              Severity: {a.severity} — Status: {a.status}
+      {alerts.length === 0 ? <p>No alerts</p> : (
+        <div className="space-y-3">
+          {alerts.map(a => (
+            <div key={a._id} className="bg-white p-4 rounded shadow flex justify-between">
+              <div>
+                <div className="font-medium">{a.message}</div>
+                <div className="text-sm text-slate-500">Child: {a.childId?.name ?? a.childId} • Level: {a.level ?? a.riskLevel}</div>
+                <div className="text-xs text-slate-400">{new Date(a.createdAt).toLocaleString()}</div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <button className="btn btn-sm" onClick={() => alert("Assign / resolve - implement")}>Assign</button>
+                <button className="btn btn-sm btn-error" onClick={() => handleDelete(a._id)}>Delete</button>
+                <button className="px-3 py-1 bg-blue-500 text-white rounded"
+       onClick={() => {
+       setSelectedAlert(a);
+       setEditOpen(true);
+        }}>
+        Edit
+      </button>
+              </div>
             </div>
-
-            <div className="text-sm mt-2">
-              Parent: {a.childId?.parentId?.name} ({a.childId?.parentId?.email})
-            </div>
-
-            <div className="text-sm mt-2">
-              Assessment Score: {a.assessmentId?.totalScore ?? "N/A"}
-            </div>
-
-            {/* Buttons */}
-            <div className="flex gap-3 mt-3">
-              <button
-                className="btn btn-sm btn-outline"
-                onClick={() => {
-                  setSelectedAlert(a);
-                  setEditOpen(true);
-                }}
-              >
-                Edit
-              </button>
-
-              <button
-                className="btn btn-sm btn-primary"
-                onClick={() => markResolved(a)}
-              >
-                Mark Resolved
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* EDIT MODAL */}
+          ))}
+        </div>
+      )}
       <EditAlertModal
-        open={editOpen}
-        onClose={() => setEditOpen(false)}
-        alertData={selectedAlert}
-        onUpdated={load}
-      />
+  open={editOpen}
+  onClose={() => setEditOpen(false)}
+  alert={selectedAlert}
+  onUpdated={load}
+  />
     </div>
   );
 }

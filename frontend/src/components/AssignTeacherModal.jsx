@@ -3,7 +3,6 @@ import Modal from "./ui/Modal";
 import api from "@/lib/api";
 
 export default function AssignTeacherModal({ open, onClose, child, onUpdated }) {
-    if (!open || !child) return null;
   const [teachers, setTeachers] = useState([]);
   const [selected, setSelected] = useState("");
 

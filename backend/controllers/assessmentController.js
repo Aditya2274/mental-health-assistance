@@ -108,8 +108,8 @@ export const getRecentAssessments = async (req, res) => {
       .limit(20)
       .populate("childId", "name age grade")
       .populate("raterId", "name role");
-     const cleanassessment=result.filter(a=>a.childId);
-    res.json({ assessments: cleanassessment });
+
+    res.json({ assessments: result });
 
   } catch (err) {
     console.error("Recent assessments error:", err);

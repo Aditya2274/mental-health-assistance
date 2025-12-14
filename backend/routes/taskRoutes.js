@@ -16,10 +16,7 @@ router.post("/", teacherOnly, async (req, res) => {
 
 // Get tasks for teachers/counsellors
 router.get("/", async (req, res) => {
-  const tasks = await Task.find({ assignedTo: req.user._id })
-    .populate("childId")
-    .populate("assignedTo");
-
+  const tasks = await Task.find().populate("childId assignedTo");
   res.json({ tasks });
 });
 
