@@ -63,7 +63,7 @@ export const login = async (req, res) => {
     // Set secure cookie with session id
     const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
       sameSite: "none",
       maxAge: COOKIE_MAX_AGE,
       path: "/",
