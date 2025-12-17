@@ -46,7 +46,9 @@ export const login = async (req, res) => {
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) return res.status(400).json({ msg: "Invalid credentials" });
 
-    const match = bcrypt.compare(password, user.password);
+    // IMPORTANT: await bcrypt.compare so that password is actually verified.
+    // Without await, `match` is a Promise which is always truthy, allowing any password.
+    const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).json({ msg: "Invalid credentials" });
 
     // Create session id and store in Redis

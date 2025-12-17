@@ -11,6 +11,7 @@ export default function Signup() {
     password: "",
     role: "parent"
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -23,7 +24,7 @@ export default function Signup() {
       await api.post("/auth/register", form);
 
       alert("Account created successfully!");
-      navigate("/");  // go to login
+      navigate("/login");  // go to login
     } catch (err) {
       alert(err.response?.data?.message || "Registration failed");
     }
@@ -87,14 +88,23 @@ export default function Signup() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Password
             </label>
-            <input
-              name="password"
-              type="password"
-              placeholder="Create a password"
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm"
-              onChange={handleChange}
-              required
-            />
+            <div className="relative">
+              <input
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Create a password"
+                className="w-full px-4 py-3 pr-10 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                onChange={handleChange}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 text-sm"
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
           </div>
 
           <div className="mb-6">
@@ -123,7 +133,7 @@ export default function Signup() {
 
           <p className="text-center text-sm mt-6 text-gray-600">
             Already have an account?{" "}
-            <Link to="/" className="text-purple-600 hover:text-purple-700 font-semibold underline underline-offset-2">
+            <Link to="/login" className="text-purple-600 hover:text-purple-700 font-semibold underline underline-offset-2">
               Login
             </Link>
           </p>

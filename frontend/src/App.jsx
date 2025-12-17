@@ -7,6 +7,7 @@ import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import NotFound from "@/pages/Extras/NotFound.jsx";
 import Forbidden403 from "@/pages/Extras/Forbidden403.jsx";
+import Landing from "@/pages/Landing.jsx";
 
 // Parent
 import ParentDashboardLayout from "@/layout/parent/ParentDashBoardLayout";
@@ -53,7 +54,8 @@ export default function App() {
         <Routes>
 
           {/* Public */}
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           
            {/* Admin Routes */}
