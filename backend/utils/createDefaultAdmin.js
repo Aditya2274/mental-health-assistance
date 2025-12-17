@@ -1,6 +1,7 @@
-  import User from "../models/User.js";
-  import bcrypt from "bcryptjs";
-
+import dotenv from "dotenv";
+import User from "../models/User.js";
+import bcrypt from "bcryptjs";
+dotenv.config();
   export const createDefaultAdmin = async () => {
     try {
       const existing = await User.findOne({ role: "admin" });
@@ -10,11 +11,11 @@
         return;
       }
 
-      const hashed = await bcrypt.hash("Adityaismyname@22", 10);
+      const hashed = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
 
       const admin = await User.create({
-        name: "Aditya2274",
-        email: "adityaashoksingh7@gmail.com",
+        name: process.env.ADMIN_USER,
+        email: process.env.ADMIN_MAIL,
         password: hashed,
         role: "admin"
       });
