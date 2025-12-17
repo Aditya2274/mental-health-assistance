@@ -42,6 +42,9 @@ async function start() {
     await connectDB();
     await connectRedis();
     console.log(8);
+    app.get("/", (req, res) => {
+     res.send("Mental Health Assistance Backend is running");
+    });
     app.use("/admin", adminRoutes);
     app.use("/auth", authRoutes);
     console.log(9);
