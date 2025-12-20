@@ -125,13 +125,13 @@ export const logout = async (req, res) => {
 export const googleAuth = async (req, res) => {
   try {
     const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-    const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL || "http://localhost:5173";
+    const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
     
     if (!GOOGLE_CLIENT_ID) {
       return res.status(500).json({ msg: "Google OAuth not configured" });
     }
 
-    const redirectUri = `${GOOGLE_CALLBACK_URL}/auth/google/callback`;
+    const redirectUri = `${FRONTEND_ORIGIN}/auth/google/callback`;
     const scope = "openid email profile";
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent`;
 
@@ -151,15 +151,15 @@ export const googleCallback = async (req, res) => {
     const { code } = req.query;
     const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
     const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-    const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL || "http://localhost:5173";
-    const redirectUri = `${GOOGLE_CALLBACK_URL}/auth/google/callback`;
+    const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+    const redirectUri = process.env.GOOGLE_CALLBACK_URL
 
     if (!code) {
-      return res.redirect(`${GOOGLE_CALLBACK_URL}/login?error=no_code`);
+      return res.redirect(`${FRONTEND_ORIGIN}/login?error=no_code`);
     }
 
     if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
-      return res.redirect(`${GOOGLE_CALLBACK_URL}/login?error=not_configured`);
+      return res.redirect(`${FRONTEND_ORIGIN}/login?error=not_configured`);
     }
 
     // Exchange code for access token
@@ -176,7 +176,7 @@ export const googleCallback = async (req, res) => {
     });
 
     if (!tokenResponse.ok) {
-      return res.redirect(`${GOOGLE_CALLBACK_URL}/login?error=token_exchange_failed`);
+      return res.redirect(`${FRONTEND_ORIGIN}/login?error=token_exchange_failed`);
     }
 
     const tokens = await tokenResponse.json();
@@ -188,14 +188,14 @@ export const googleCallback = async (req, res) => {
     });
 
     if (!userInfoResponse.ok) {
-      return res.redirect(`${GOOGLE_CALLBACK_URL}/login?error=user_info_failed`);
+      return res.redirect(`${FRONTEND_ORIGIN}/login?error=user_info_failed`);
     }
 
     const googleUser = await userInfoResponse.json();
     const { email, name, picture } = googleUser;
 
     if (!email) {
-      return res.redirect(`${GOOGLE_CALLBACK_URL}/login?error=no_email`);
+      return res.redirect(`${FRONTEND_ORIGIN}/login?error=no_email`);
     }
 
     // Find or create user
@@ -237,10 +237,10 @@ export const googleCallback = async (req, res) => {
       admin: "/admin",
     };
 
-    res.redirect(`${GOOGLE_CALLBACK_URL}${roleRedirect[user.role] || "/parent"}`);
+    res.redirect(`${FRONTEND_ORIGIN}${roleRedirect[user.role] || "/parent"}`);
   } catch (err) {
     console.error("Google callback error:", err);
-    const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL || "http://localhost:5173";
-    return res.redirect(`${GOOGLE_CALLBACK_URL}/login?error=server_error`);
+    const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+    return res.redirect(`${FRONTEND_ORIGIN}/login?error=server_error`);
   }
 };
