@@ -63,8 +63,8 @@ export const login = async (req, res) => {
     // Set secure cookie with session id
     const cookieOptions = {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: COOKIE_MAX_AGE,
       path: "/",
     };
@@ -115,5 +115,132 @@ export const logout = async (req, res) => {
   } catch (err) {
     console.error("Logout error:", err);
     return res.status(500).json({ msg: err.message });
+  }
+};
+
+/**
+ * Google OAuth - Initiate login
+ * Redirects user to Google OAuth consent screen
+ */
+export const googleAuth = async (req, res) => {
+  try {
+    const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+    const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+    
+    if (!GOOGLE_CLIENT_ID) {
+      return res.status(500).json({ msg: "Google OAuth not configured" });
+    }
+
+    const redirectUri = `${FRONTEND_ORIGIN}/auth/google/callback`;
+    const scope = "openid email profile";
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent`;
+
+    res.json({ authUrl: googleAuthUrl });
+  } catch (err) {
+    console.error("Google auth error:", err);
+    return res.status(500).json({ msg: err.message });
+  }
+};
+
+/**
+ * Google OAuth - Handle callback
+ * Exchange code for token, get user info, create/login user
+ */
+export const googleCallback = async (req, res) => {
+  try {
+    const { code } = req.query;
+    const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+    const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+    const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+    const redirectUri = `${FRONTEND_ORIGIN}/auth/google/callback`;
+
+    if (!code) {
+      return res.redirect(`${FRONTEND_ORIGIN}/login?error=no_code`);
+    }
+
+    if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+      return res.redirect(`${FRONTEND_ORIGIN}/login?error=not_configured`);
+    }
+
+    // Exchange code for access token
+    const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        code,
+        client_id: GOOGLE_CLIENT_ID,
+        client_secret: GOOGLE_CLIENT_SECRET,
+        redirect_uri: redirectUri,
+        grant_type: "authorization_code",
+      }),
+    });
+
+    if (!tokenResponse.ok) {
+      return res.redirect(`${FRONTEND_ORIGIN}/login?error=token_exchange_failed`);
+    }
+
+    const tokens = await tokenResponse.json();
+    const { access_token } = tokens;
+
+    // Get user info from Google
+    const userInfoResponse = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+      headers: { Authorization: `Bearer ${access_token}` },
+    });
+
+    if (!userInfoResponse.ok) {
+      return res.redirect(`${FRONTEND_ORIGIN}/login?error=user_info_failed`);
+    }
+
+    const googleUser = await userInfoResponse.json();
+    const { email, name, picture } = googleUser;
+
+    if (!email) {
+      return res.redirect(`${FRONTEND_ORIGIN}/login?error=no_email`);
+    }
+
+    // Find or create user
+    let user = await User.findOne({ email: email.toLowerCase().trim() });
+
+    if (!user) {
+      // Create new user with Google OAuth (no password required)
+      user = await User.create({
+        name: name || email.split("@")[0],
+        email: email.toLowerCase().trim(),
+        password: "", // Google OAuth users don't need password
+        role: "parent", // Default role, can be changed later
+      });
+    }
+
+    // Create session
+    const sessionId = uuidv4();
+    const redisKey = `sess:${sessionId}`;
+
+    await redisClient.set(redisKey, JSON.stringify({ userId: String(user._id), role: user.role }), {
+      EX: 60 * 60 * 24 * (Number(process.env.COOKIE_MAX_AGE_DAYS) || 7),
+    });
+
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: COOKIE_MAX_AGE,
+      path: "/",
+    };
+
+    res.cookie(COOKIE_NAME, sessionId, cookieOptions);
+
+    // Redirect based on role
+    const roleRedirect = {
+      parent: "/parent",
+      teacher: "/teacher",
+      counsellor: "/counsellor",
+      admin: "/admin",
+    };
+
+    res.redirect(`${FRONTEND_ORIGIN}${roleRedirect[user.role] || "/parent"}`);
+  } catch (err) {
+    console.error("Google callback error:", err);
+    const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+    return res.redirect(`${FRONTEND_ORIGIN}/login?error=server_error`);
   }
 };
