@@ -36,7 +36,6 @@ export default function SystemAlerts() {
                 <div className="text-xs text-slate-400">{new Date(a.createdAt).toLocaleString()}</div>
               </div>
               <div className="flex flex-col gap-2">
-                <button className="btn btn-sm" onClick={() => alert("Assign / resolve - implement")}>Assign</button>
                 <button className="btn btn-sm btn-error" onClick={() => handleDelete(a._id)}>Delete</button>
                 <button className="px-3 py-1 bg-blue-500 text-white rounded"
        onClick={() => {

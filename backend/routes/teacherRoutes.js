@@ -6,7 +6,9 @@ import {
   createCheckin,
   listCheckins,
   updateCheckin,
-  deleteCheckin
+  deleteCheckin,
+  getAssignedChildren,
+  getTeacherChildProfile
 } from "../controllers/teacherController.js";
 import { auth, requireAuth, teacherOnly } from "../middleware/auth.js";
 
@@ -16,6 +18,8 @@ teacherRouter.use(auth);
 teacherRouter.use(requireAuth);
 teacherRouter.use(teacherOnly);
 
+teacherRouter.get("/children", getAssignedChildren);
+teacherRouter.get("/children/:id", getTeacherChildProfile);
 // assessments by teacher
 teacherRouter.post("/assessment", submitTeacherAssessment);
 teacherRouter.get("/assessments/recent", getRecentTeacherAssessments);

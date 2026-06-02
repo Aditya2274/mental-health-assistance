@@ -13,6 +13,8 @@ const childSchema = new mongoose.Schema({
     ref: "User",
     default: null 
   },
+  deleted: { type: Boolean, default: false },
+  deletedAt: { type: Date, default: null },
   consents: {
     parentalConsent: { type: Boolean, default: false },
     consentDate: Date,

@@ -7,6 +7,7 @@ import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import NotFound from "@/pages/Extras/NotFound.jsx";
 import Forbidden403 from "@/pages/Extras/Forbidden403.jsx";
+import Landing from "@/pages/Landing.jsx";
 
 // Parent
 import ParentDashboardLayout from "@/layout/parent/ParentDashBoardLayout";
@@ -23,6 +24,7 @@ import EditChild from "@/pages/Parents/EditChild";
 import TeacherDashboardLayout from "@/layout/teacher/TeacherDashboardLayout.jsx";
 import TeacherDashBoard from "@/pages/Teachers/TeacherDashBoard.jsx";
 import TeacherChildren from "@/pages/Teachers/TeacherChildren.jsx";
+import TeacherChildProfile from "@/pages/Teachers/TeacherChildProfile.jsx";
 import TeacherAssessments from "@/pages/Teachers/TeacherAssessments.jsx";
 import WeeklyCheckins from "@/pages/Teachers/WeeklyCheckins.jsx";
 import TeacherAlerts from "@/pages/Teachers/TeacherAlerts.jsx";
@@ -40,6 +42,7 @@ import CounsellorSettings from "@/pages/CounsellorPages/CounsellorSettings.jsx";
 
 // Admin
 import AdminDashboard from "@/pages/AdminPages/AdminDashboard.jsx";
+import AdminChildProfile from "./pages/AdminPages/AdminChildProfile.jsx";
 import AdminDashboardLayout from "./layout/admin/AdminDashboardLayout.jsx";
 import UsersManagement from "@/pages/AdminPages/UsersManagement.jsx";
 import ChildrenManagement from "@/pages/AdminPages/ChildrenManagement.jsx";
@@ -51,7 +54,8 @@ export default function App() {
         <Routes>
 
           {/* Public */}
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           
            {/* Admin Routes */}
@@ -60,11 +64,11 @@ export default function App() {
              <AdminDashboardLayout />
           </ProtectedRoute>
            }>
-           <Route index element={<AdminDashboard />} />
+           <Route index element={<Navigate to="/admin/users" replace />} />
            <Route path="users" element={<UsersManagement />} />
            <Route path="children" element={<ChildrenManagement />} />
+           <Route path="children/:id" element={<AdminChildProfile />} />
            <Route path="alerts" element={<SystemAlerts />} />
-           <Route path="reports" element={<Reports />} />
            </Route>
 
           {/* Parent Routes */}
@@ -97,10 +101,10 @@ export default function App() {
           >
             <Route index element={<TeacherDashBoard />} />
             <Route path="children" element={<TeacherChildren />} />
+            <Route path="children/:id" element={<TeacherChildProfile />} />
             <Route path="assessments" element={<TeacherAssessments />} />
             <Route path="checkins" element={<WeeklyCheckins />} />
             <Route path="alerts" element={<TeacherAlerts />} />
-            <Route path="settings" element={<TeacherSettings />} />
             <Route path="taskboard" element={<TaskBoard />} />
           </Route>
 
@@ -118,7 +122,6 @@ export default function App() {
              <Route path="alerts" element={<CounsellorAlerts />} />
              <Route path="review/:id" element={<AssessmentReview />} />
              <Route path="child/:id" element={<CounsellorChildProfile />} />
-             <Route path="settings" element={<CounsellorSettings />} />
            </Route>
 
           {/* Errors */}

@@ -13,7 +13,7 @@ export default function WeeklyCheckins() {
 
   const loadChildren = async () => {
     try {
-      const res = await api.get("/children/mine"); // or /teacher/children
+      const res = await api.get("/teacher/children");
       const list = res.data?.children || res.data || [];
       setChildren(list);
     } catch (err) {

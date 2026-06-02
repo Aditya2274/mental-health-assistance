@@ -5,7 +5,7 @@ export default function AlertCard({ alert, onMarkRead, onDelete }) {
       <div className="flex justify-between items-start">
         <div>
           <div className="font-semibold">{alert.message || (alert.title ?? "Alert")}</div>
-          <div className="text-sm text-gray-600">Child: {alert.childId}</div>
+          <div className="text-sm text-gray-600">Child: {alert.childId?.name || alert.childId || "Unknown"}</div>
           <div className="text-xs text-gray-500">{new Date(alert.createdAt).toLocaleString()}</div>
         </div>
 

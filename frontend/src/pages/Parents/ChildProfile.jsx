@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import ChatBox from "@/components/ChatBox.jsx";
 import api from "../../lib/api";
 
 export default function ChildProfile() {
@@ -64,6 +65,8 @@ export default function ChildProfile() {
           </div>
         ))
       )}
+      {/* Parent ↔ Counsellor Chat */}
+      <ChatBox childId={child._id} />
     </div>
   );
 }

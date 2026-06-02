@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Modal from "./ui/Modal";
 import api from "@/lib/api";
 
-export default function AssignTeacherModal({ open, onClose, child, onUpdated }) {
+export default function AssignTeacherModal({ open, onClose, child, onUpdated, userRole = "admin" }) {
   const [teachers, setTeachers] = useState([]);
   const [selected, setSelected] = useState("");
 
@@ -14,14 +14,22 @@ export default function AssignTeacherModal({ open, onClose, child, onUpdated }) 
   }, [child]);
 
   const loadTeachers = async () => {
-    const res = await api.get("/admin/users");
-    setTeachers(res.data.users.filter((u) => u.role === "teacher"));
+    const endpoint = userRole === "counsellor" ? "/counsellor/teachers" : "/admin/users";
+    const res = await api.get(endpoint);
+    const teacherList = userRole === "counsellor" 
+      ? res.data.teachers 
+      : res.data.users.filter((u) => u.role === "teacher");
+    setTeachers(teacherList);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await api.put(`/admin/children/${child._id}/assign-teacher`, {
+    const endpoint = userRole === "counsellor" 
+      ? `/counsellor/children/${child._id}/assign-teacher`
+      : `/admin/children/${child._id}/assign-teacher`;
+
+    await api.put(endpoint, {
       teacherId: selected,
     });
 

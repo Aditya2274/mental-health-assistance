@@ -3,6 +3,7 @@ import Alert from "../models/Alert.js";
 import Assessment from "../models/Assessment.js";
 import Child from "../models/Child.js";
 import CaseNote from "../models/CaseNote.js";
+import Checkin from "../models/Checkin.js";
 import User from "../models/User.js";
 
 /**
@@ -18,9 +19,16 @@ export const getCounsellorAlerts = async (req, res) => {
         { assignedTo: null }
       ]
     })
-      .populate("childId", "name age grade parentId")
-      .populate("assessmentId")
-      .sort({ createdAt: -1 });
+      .populate({
+        path: "childId",
+        select: "name age grade parentId"
+      })
+      .populate({
+        path: "assessmentId",
+        select: "instrument totalScore riskLevel createdAt"
+      })
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.json({ alerts });
   } catch (err) {
@@ -31,13 +39,17 @@ export const getCounsellorAlerts = async (req, res) => {
 
 export const getRecentAssessments = async (req, res) => {
   try {
-    const assessments = await Assessment.find()
+    // Only get actual assessments (must have instrument field and not be orphaned)
+    const assessments = await Assessment.find({
+      instrument: { $exists: true, $ne: null },
+      orphaned: { $ne: true }
+    })
       .populate("childId", "name age grade")
       .populate("raterId", "name role email")
       .sort({ createdAt: -1 })
       .limit(50);
-
-    res.json({ assessments });
+      const validAssessments = assessments.filter(a => a.childId && a.instrument);
+      res.json({ assessments: validAssessments });
   } catch (err) {
     console.error("getRecentAssessments:", err);
     res.status(500).json({ msg: "Failed to load assessments" });
@@ -50,7 +62,10 @@ export const getChild = async (req, res) => {
     if (!child) return res.status(404).json({ msg: "Child not found" });
     const assessments = await Assessment.find({ childId: child._id }).sort({ createdAt: -1 });
     const notes = await CaseNote.find({ childId: child._id }).populate("counsellorId", "name");
-    res.json({ child, assessments, notes });
+    const checkins = await Checkin.find({ childId: child._id })
+      .populate("teacherId", "name email")
+      .sort({ date: -1, createdAt: -1 });
+    res.json({ child, assessments, notes, checkins });
   } catch (err) {
     console.error("getChild:", err);
     res.status(500).json({ msg: "Failed to load child profile" });
@@ -137,6 +152,52 @@ export const getAllChildrenForCounsellor = async (req, res) => {
   } catch (err) {
     console.error("Counsellor get children error:", err);
     res.status(500).json({ msg: "Failed to load children" });
+  }
+};
+
+/**
+ * Get all teachers (for assigning to children)
+ */
+export const getTeachers = async (req, res) => {
+  try {
+    const teachers = await User.find({ role: "teacher" })
+      .select("name email")
+      .sort({ name: 1 });
+    res.json({ teachers });
+  } catch (err) {
+    console.error("getTeachers:", err);
+    res.status(500).json({ msg: "Failed to load teachers" });
+  }
+};
+
+/**
+ * Assign teacher to a child
+ */
+export const assignTeacherToChild = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { teacherId } = req.body;
+
+    if (!teacherId) {
+      return res.status(400).json({ msg: "teacherId is required" });
+    }
+
+    const child = await Child.findByIdAndUpdate(
+      id,
+      { assignedTeacher: teacherId },
+      { new: true }
+    )
+      .populate("assignedTeacher", "name email")
+      .populate("parentId", "name email");
+
+    if (!child) {
+      return res.status(404).json({ msg: "Child not found" });
+    }
+
+    res.json({ msg: "Teacher assigned successfully", child });
+  } catch (err) {
+    console.error("assignTeacherToChild:", err);
+    res.status(500).json({ msg: "Failed to assign teacher" });
   }
 };
 

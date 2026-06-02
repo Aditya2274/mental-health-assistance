@@ -7,7 +7,9 @@ import {
   assignAlert,
   resolveAlert,
   search,
-  getAllChildrenForCounsellor
+  getAllChildrenForCounsellor,
+  getTeachers,
+  assignTeacherToChild
 } from "../controllers/counsellorController.js";
 import { getAssessment,createCaseNote,getCaseNotesForChild } from "../controllers/caseNoteController.js";
 import { auth, counsellorOnly, requireAuth } from "../middleware/auth.js";
@@ -25,6 +27,8 @@ router.get("/assessments/recent", getRecentAssessments);
 router.get("/assessment/:id",auth, counsellorOnly, getAssessment);
 router.get("/child/:id", getChild);
 router.get("/children", getAllChildrenForCounsellor);
+router.get("/teachers", getTeachers);
+router.put("/children/:id/assign-teacher", assignTeacherToChild);
 
 router.post("/casenote", createCaseNote);
 router.get("/casenotes/:childId", getCaseNotesForChild);
