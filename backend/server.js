@@ -15,7 +15,6 @@ import adminRoutes from "./routes/adminRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import teacherRouter from "./routes/teacherRoutes.js";
 import counsellorRoutes from "./routes/counsellorRoutes.js";
-import parentRoutes from "./routes/parentRoutes.js"
 console.log(1);
 dotenv.config();
 createDefaultAdmin();
@@ -47,7 +46,6 @@ async function start() {
     app.use("/assessment", assessmentRoutes);
     console.log(10);
     app.use("/alerts", alertRoutes);
-    app.use("/parent", parentRoutes);
     app.use("/children", childRoutes);
     app.use("/tasks", taskRoutes);
     app.use("/teacher",teacherRouter);

@@ -18,16 +18,9 @@ export const getCounsellorAlerts = async (req, res) => {
         { assignedTo: null }
       ]
     })
-      .populate({
-        path: "childId",
-        select: "name age grade parentId"
-      })
-      .populate({
-        path: "assessmentId",
-        select: "instrument totalScore riskLevel createdAt"
-      })
-      .sort({ createdAt: -1 })
-      .lean();
+      .populate("childId", "name age grade parentId")
+      .populate("assessmentId")
+      .sort({ createdAt: -1 });
 
     res.json({ alerts });
   } catch (err) {
@@ -43,8 +36,8 @@ export const getRecentAssessments = async (req, res) => {
       .populate("raterId", "name role email")
       .sort({ createdAt: -1 })
       .limit(50);
-      const validAssessments = assessments.filter(a => a.childId);
-      res.json({ assessments: validAssessments });
+
+    res.json({ assessments });
   } catch (err) {
     console.error("getRecentAssessments:", err);
     res.status(500).json({ msg: "Failed to load assessments" });

@@ -16,8 +16,7 @@ const findAlertsForChildren = async (childIds = []) => {
  */
 export const getAlertsForParent = async (req, res) => {
   try {
-    const children = await Child.find({ assignedTeacher: req.user._id,
-  deleted: false,parentId: req.user._id }).select("_id").lean();
+    const children = await Child.find({ parentId: req.user._id }).select("_id").lean();
     const childIds = children.map((c) => c._id);
     const alerts = await findAlertsForChildren(childIds);
     return res.json({ alerts });

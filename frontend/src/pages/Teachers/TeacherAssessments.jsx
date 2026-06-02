@@ -14,7 +14,7 @@ export default function TeacherAssessments() {
     setLoading(true);
     try {
       // reuse counsellor/all children endpoint or admin children; if you have a teacher-specific endpoint, call that
-      const res = await api.get("/teacher/children"); // if teachers have assigned children, adjust to /teacher/children
+      const res = await api.get("/children/mine"); // if teachers have assigned children, adjust to /teacher/children
       // defensive: backend may return {children} or array
       const list = res.data?.children || res.data || [];
       setChildren(list);
@@ -41,8 +41,8 @@ export default function TeacherAssessments() {
                 <div className="text-sm text-gray-500">Age {c.age} • Grade {c.grade}</div>
               </div>
               <div className="flex flex-col gap-2">
-                 <Link to={`/teacher/children/${c._id}`}className="btn btn-sm">Profile</Link>
-                <Link to={`/assessments/recent`} className="btn btn-sm btn-ghost">Latest Assessment</Link>
+                <Link to={`/teacher/children/${c._id}`} className="btn btn-sm">Profile</Link>
+                <Link to={`/counsellor/review/${c.lastAssessment?._id}`} className="btn btn-sm btn-ghost">Latest Assessment</Link>
               </div>
             </div>
 
