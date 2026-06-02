@@ -40,6 +40,7 @@ import CounsellorSettings from "@/pages/CounsellorPages/CounsellorSettings.jsx";
 
 // Admin
 import AdminDashboard from "@/pages/AdminPages/AdminDashboard.jsx";
+import AdminChildProfile from "./pages/AdminPages/AdminChildProfile.jsx";
 import AdminDashboardLayout from "./layout/admin/AdminDashboardLayout.jsx";
 import UsersManagement from "@/pages/AdminPages/UsersManagement.jsx";
 import ChildrenManagement from "@/pages/AdminPages/ChildrenManagement.jsx";
@@ -63,6 +64,7 @@ export default function App() {
            <Route index element={<AdminDashboard />} />
            <Route path="users" element={<UsersManagement />} />
            <Route path="children" element={<ChildrenManagement />} />
+           <Route path="children/:id" element={<AdminChildProfile />} />
            <Route path="alerts" element={<SystemAlerts />} />
            <Route path="reports" element={<Reports />} />
            </Route>

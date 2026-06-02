@@ -5,6 +5,7 @@ const assessmentSchema = new mongoose.Schema({
   raterId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   instrument: { type: String, required: true }, // PHQ-A, GAD-7, SDQ, etc.
   responses: { type: Object, required: true },
+  orphaned: { type: Boolean, default: false },
   totalScore: { type: Number, default: 0 },
   riskLevel: { type: String, enum: ["low", "medium", "high"], default: "low" },
 }, { timestamps: true });
