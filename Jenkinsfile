@@ -37,9 +37,10 @@ pipeline{
         }
         stage('Deploying to docker-hub'){
             steps{
-                withCredentials([usernamePassword(credentialsId:'dockerhub-creds',passwordvariable:'DOCKER_PASS',usernamevariable:'DOCKER_USER')])
-                sh "echo /${DOCKER_PASS} |docker login -u ${DOCKER_USER} --password-stdin"
-                sh "docker push ${env.IMAGE_TAG}"
+                withCredentials([usernamePassword(credentialsId:'dockerhub-creds',passwordvariable:'DOCKER_PASS',usernamevariable:'DOCKER_USER')]){
+                    sh "echo /${DOCKER_PASS} |docker login -u ${DOCKER_USER} --password-stdin"
+                    sh "docker push ${env.IMAGE_TAG}"
+                }
             }
         }
     }
