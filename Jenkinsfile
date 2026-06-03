@@ -59,7 +59,7 @@ pipeline {
         }
     }
 }
-now from here is the pipeline script for using docker to package jenkins environment build itself
+// now from here is the pipeline script for using docker to package jenkins environment build itself
 // pipeline{
 //     agent any
 //     environment{
