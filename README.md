@@ -12,7 +12,7 @@ ThoughtCare is a full-stack mental health assistance web application designed to
 
 The application follows a decoupled architecture where the frontend and backend are deployed independently for better scalability and maintainability.
 
----
+--- 
 
 ## Key Features
 
