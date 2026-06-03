@@ -30,10 +30,8 @@ pipeline{
         }
         stage('Docker-image-build'){
             steps{
-                dir('backend'){
                     sh "docker build -t ${env.IMAGE_TAG} ."
                 }
-            }
         }
         stage('Deploying to docker-hub'){
             steps{
