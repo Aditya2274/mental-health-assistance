@@ -3,7 +3,7 @@ pipeline{
     environment{
         DOCKER_USER='adityaashok2274'
         IMGAE_NAME='mental-health-backend'
-        IMGAE_TAG='${DOCKER_uSER}/${IMAGE_NAME}:${env.BUILDER_NAME}'
+        IMGAE_TAG="${DOCKER_USER}/${IMAGE_NAME}:${env.BUILDER_NAME}"
     }
     tools{
         nodejs 'nodejs24'
@@ -31,15 +31,15 @@ pipeline{
         stage('Docker-image-build'){
             steps{
                 dir('backend'){
-                    sh 'docker build -t ${IMAGE_TAG} .'
+                    sh "docker build -t ${IMAGE_TAG} ."
                 }
             }
         }
         stage('Deploying to docker-hub'){
             steps{
                 withCredentials([usernamePassword(credentialsId:'dockerhub-creds',passwordvariable:'DOCKER_PASS',usernamevariable:'DOCKER_USER')])
-                sh 'echo /${DOCKER_PASS} |docker login -u ${DOCKER_USER} --password-stdin'
-                sh 'docker push ${IMAGE_TAG}'
+                sh "echo /${DOCKER_PASS} |docker login -u ${DOCKER_USER} --password-stdin"
+                sh '"docker push ${IMAGE_TAG}"
             }
         }
     }
