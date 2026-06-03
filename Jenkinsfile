@@ -31,7 +31,7 @@ pipeline{
         stage('Docker-image-build'){
             steps{
                 dir('backend'){
-                    sh "docker build -t ${IMAGE_TAG} ."
+                    sh "docker build -t ${env.IMAGE_TAG} ."
                 }
             }
         }
@@ -39,7 +39,7 @@ pipeline{
             steps{
                 withCredentials([usernamePassword(credentialsId:'dockerhub-creds',passwordvariable:'DOCKER_PASS',usernamevariable:'DOCKER_USER')])
                 sh "echo /${DOCKER_PASS} |docker login -u ${DOCKER_USER} --password-stdin"
-                sh "docker push ${IMAGE_TAG}"
+                sh "docker push ${env.IMAGE_TAG}"
             }
         }
     }
