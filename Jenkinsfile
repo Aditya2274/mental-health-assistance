@@ -96,7 +96,7 @@ pipeline{
         stage('Deploying docker-image'){
             steps{
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds',passwordVariable: 'DOCKER_PASS',usernameVariable: 'CREDS_USER')]){
-                    sh "echo /$DOCKER_PASS | docker login -u $CREDS_USER --password-stdin"
+                    sh "echo \$DOCKER_PASS | docker login -u \$CREDS_USER --password-stdin"
                     sh "docker push ${env.DOCKER_USER}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}"
                 }
             }
